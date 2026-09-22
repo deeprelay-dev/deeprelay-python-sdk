@@ -1,0 +1,45 @@
+# OpenAPI Generator Ignore — reviewed boilerplate trim list (Phase 77, SOW M3a, D-08).
+#
+# The `python` generator emits repo-management boilerplate alongside the client.
+# The hazard is CI/tooling EXECUTING these scripts and workflows — not clutter —
+# so each entry below states WHY it is dropped. Paths are relative to this
+# directory (sdk/python), because openapi-generator reads this file from the
+# output root (-o value). gitignore syntax; a `#` mid-line is literal, so every
+# WHY comment sits on its own line above its entry.
+#
+# NO TYPESCRIPT-SIDE TWIN EXISTS: the typescript-fetch generator emits NONE of
+# these files (verified live in 77-RESEARCH.md Pitfall 5), so typescript entries
+# would be dead/misleading — D-08's review bar rejects dead entries.
+#
+# DELIBERATELY KEPT (do not add here): generated docs/ (feeds Phase 78 READMEs
+# and Phase 79 guides) and generated test/ (seed for Phase 78 smoke), per D-08.
+
+# WHY: pushes this directory to a remote git repo on execution — running it from
+# inside this monorepo would create/force-push an unsanctioned external repo;
+# publishing is Adi-gated (D-06/Phase 78) and never script-driven from output.
+git_push.sh
+
+# WHY: live Travis CI pipeline definition — if this tree is ever mirrored to a
+# repo with Travis enabled, it would execute unreviewed third-party CI against
+# our code. We define our own CI; generated pipelines must not run.
+.travis.yml
+
+# WHY: live GitLab CI pipeline definition — same execution hazard as .travis.yml
+# for any GitLab-connected mirror. Unreviewed, not ours, must not run.
+.gitlab-ci.yml
+
+# WHY: nested GitHub Actions workflow — GitHub executes workflows from .github/
+# directories; a mirror or subtree extraction of sdk/python would run this
+# unreviewed workflow with the host repo's permissions. Our CI lives in the
+# repo-root .github/ only.
+.github/workflows/python.yml
+
+# WHY: generator emits an EOL Python floor here (requires-python ">=3.9";
+# 3.9 reached end-of-life 2025-10-31) that contradicts its own setup.py
+# (">= 3.10") and README ("Python 3.10+"). No config knob exists to fix it
+# (config-help -g python at 7.24.0 has no floor property), so this
+# ignore-protected copy pins requires-python ">=3.10" as a D-21 named
+# exception. This is packaging metadata, not API code — the reviewed
+# exception mechanism, not a silent hand-edit (Phase 77-06, flagged to Adi).
+pyproject.toml
+LICENSE

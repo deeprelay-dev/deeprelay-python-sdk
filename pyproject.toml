@@ -1,0 +1,112 @@
+[project]
+name = "deeprelay-sdk"
+# D-01 placeholder (Phase 78-01): the committed tree NEVER carries a real
+# release version. sdk-release.yml computes the version from the last
+# sdk-py-v* tag and injects it into the build it publishes, discarding the
+# injected tree. This file is ignore-protected (see .openapi-generator-ignore)
+# so the placeholder survives regeneration; sdk/release/assert-placeholder.sh
+# fails CI if a real version ever lands here.
+version = "0.1.0"
+description = "deeprelay Public Developer API"
+authors = [
+  {name = "deeprelay Support",email = "support@deeprelay.ai"},
+]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+keywords = ["OpenAPI", "OpenAPI-Generator", "deeprelay Public Developer API"]
+# D-21 named exception (Phase 77-06): generator 7.24.0 emits an EOL Python 3.9
+# floor here (3.9 reached end-of-life 2025-10-31) that contradicts its own
+# setup.py (">= 3.10"). This file is ignore-protected (see
+# .openapi-generator-ignore) so regeneration cannot reintroduce the EOL floor.
+requires-python = ">=3.10"
+
+dependencies = [
+  "urllib3 (>=2.6.3,<3.0.0)",
+  "python-dateutil (>=2.8.2)",
+  "pydantic (>=2.11)",
+  "typing-extensions (>=4.7.1)",
+]
+
+[project.urls]
+# Real URLs hand-set here (78-08 F2): this file is ignore-protected, so the
+# generator's --git-user-id/--git-repo-id flags cannot rewrite it — Phase 101
+# D-23 repointed these by hand for exactly that reason.
+# Repository points at the PUBLIC mirror (D-16/D-17) — the private monorepo
+# 404s for customers on the PyPI project page.
+Homepage = "https://deeprelay.ai"
+Documentation = "https://deeprelay.ai/docs"
+Repository = "https://github.com/deeprelay-dev/deeprelay-python-sdk"
+
+[tool.poetry]
+requires-poetry = ">=2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">= 8.4.2"
+pytest-cov = ">= 2.8.1"
+tox = ">= 3.9.0"
+flake8 = ">= 4.0.0"
+types-python-dateutil = ">= 2.8.19.14"
+mypy = ">= 1.5"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pylint.'MESSAGES CONTROL']
+extension-pkg-whitelist = "pydantic"
+
+[tool.mypy]
+files = [
+  "deeprelay_sdk",
+  #"test",  # auto-generated tests
+  "tests", # hand-written tests
+]
+# TODO: enable "strict" once all these individual checks are passing
+# strict = true
+
+# List from: https://mypy.readthedocs.io/en/stable/existing_code.html#introduce-stricter-options
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+## Getting these passing should be easy
+strict_equality = true
+extra_checks = true
+
+## Strongly recommend enabling this one as soon as you can
+check_untyped_defs = true
+
+## These shouldn't be too much additional work, but may be tricky to
+## get passing if you use a lot of untyped libraries
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+
+### These next few are various gradations of forcing use of type annotations
+#disallow_untyped_calls = true
+#disallow_incomplete_defs = true
+#disallow_untyped_defs = true
+#
+### This one isn't too hard to get passing, but return on investment is lower
+#no_implicit_reexport = true
+#
+### This one can be tricky to get passing if you use a lot of untyped libraries
+#warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = [
+  "deeprelay_sdk.configuration",
+]
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+check_untyped_defs = true
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_reexport = true
+warn_return_any = true
