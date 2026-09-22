@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # Define package exports
 __all__ = [
@@ -52,6 +52,7 @@ __all__ = [
     "ImagesResponse",
     "ImagesResponseDataInner",
     "ImagesResponseUsage",
+    "InferencePreflight",
     "ListDeposits200Response",
     "Model",
     "ModelList",
@@ -68,7 +69,11 @@ __all__ = [
     "SpendingLimit",
     "StreamOptions",
     "Subscription",
+    "SubscriptionCheckoutRequest",
+    "SubscriptionCheckoutSession",
     "SubscriptionPlan",
+    "SubscriptionPortalRequest",
+    "SubscriptionPortalSession",
     "SubscriptionPrice",
     "SubscriptionQuota",
     "SubscriptionUsage",
@@ -121,6 +126,7 @@ from deeprelay_sdk.models.images_generations_request import ImagesGenerationsReq
 from deeprelay_sdk.models.images_response import ImagesResponse as ImagesResponse
 from deeprelay_sdk.models.images_response_data_inner import ImagesResponseDataInner as ImagesResponseDataInner
 from deeprelay_sdk.models.images_response_usage import ImagesResponseUsage as ImagesResponseUsage
+from deeprelay_sdk.models.inference_preflight import InferencePreflight as InferencePreflight
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response as ListDeposits200Response
 from deeprelay_sdk.models.model import Model as Model
 from deeprelay_sdk.models.model_list import ModelList as ModelList
@@ -137,7 +143,11 @@ from deeprelay_sdk.models.problem import Problem as Problem
 from deeprelay_sdk.models.spending_limit import SpendingLimit as SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions as StreamOptions
 from deeprelay_sdk.models.subscription import Subscription as Subscription
+from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest as SubscriptionCheckoutRequest
+from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession as SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan as SubscriptionPlan
+from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest as SubscriptionPortalRequest
+from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession as SubscriptionPortalSession
 from deeprelay_sdk.models.subscription_price import SubscriptionPrice as SubscriptionPrice
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota as SubscriptionQuota
 from deeprelay_sdk.models.subscription_usage import SubscriptionUsage as SubscriptionUsage

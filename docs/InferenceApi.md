@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**get_model**](InferenceApi.md#get_model) | **GET** /models/{id} | Get a specific model (OpenAI-compatible)
 [**get_video**](InferenceApi.md#get_video) | **GET** /videos/{id} | Get a video generation job
 [**get_video_content**](InferenceApi.md#get_video_content) | **GET** /videos/{id}/content | Download a completed video artifact
+[**inference_preflight**](InferenceApi.md#inference_preflight) | **GET** /inference/preflight | Check whether a model request would be served, and at whose expense
 [**list_models**](InferenceApi.md#list_models) | **GET** /models | List available models (OpenAI-compatible)
 [**list_videos**](InferenceApi.md#list_videos) | **GET** /videos | List video generation jobs
 
@@ -690,6 +691,101 @@ Name | Type | Description  | Notes
 **403** | API key lacks the required scope (OpenAI error envelope). |  -  |
 **404** | Model or resource not found (OpenAI error envelope). |  -  |
 **410** | The requested artifact has expired and is no longer available (OpenAI error envelope). |  -  |
+**429** | Rate limit exceeded (OpenAI error envelope). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **inference_preflight**
+> InferencePreflight inference_preflight(model)
+
+Check whether a model request would be served, and at whose expense
+
+Answers "what happens if I call this model right now?" before the call is made: whether the plan covers the model, whether the organization is subscribed, and whether there is credit to pay if it is not covered. Requires the `serverless:read` scope.
+
+Nothing is sent, counted, charged, or reserved. The verdict is computed from the state of the SAME gates that judge the real request — plan coverage, subscription entitlement, remaining plan quota, credit balance and self-set spending caps — so the advice cannot drift from enforcement. It is deliberately NOT a dry run: no per-request cost estimate is quoted, because that figure changes with every prompt and quoting it would invite clients to cache it.
+
+The gates consulted depend on the model's MODALITY, because the endpoints do not all meet the same ones. Chat, embeddings and image requests meet the full gate (balance, then the organization's opt-in daily cap, then its monthly cap). Video creation meets only the balance check, so an organization past its own spending cap but holding credit is reported as fundable for video — which is what the video endpoint will in fact do. Predicting the strictest gate rather than the applicable one would make this endpoint refuse requests the API accepts.
+
+The same is true of the plan: video creation does not run the subscription gate, so `plan_covered` is false for a video model even if an operator has placed it on the plan's covered list. That is a deliberate divergence from the same-named field on `/v1/models`, which reports the platform's configuration. Here it means "the plan covers this REQUEST" — describing what will happen is the entire job of a preflight.
+
+One caveat on "read-only": resolving the balance creates the organization's balance row if it has never had one (idempotent, org-scoped, and the same row the first real request would create). Nothing else is written.
+
+The case this exists for is `warn` / `not_plan_covered`. A subscriber calling a model outside the plan IS served and IS charged pay-as-you-go, and nothing in the response to that request says so — the first signal used to be the invoice.
+
+`funded` is a boolean and never a figure. This route is on the inference read scope, so it must not disclose the organization's balance; use `/billing/balance` for the number.
+
+Failure posture is the opposite of the request gate's: any gate that cannot be read degrades the verdict toward `ok`, never toward `block`. A false `block` would stop a customer whose request would have succeeded, while a false `ok` costs them one honest error from the real call.
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.models.inference_preflight import InferencePreflight
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.InferenceApi(api_client)
+    model = 'model_example' # str | Model id or alias, optionally with a `:economy` tier suffix. It is resolved through the catalog exactly as the inference endpoints resolve it, so an alias and a tier view answer for the model that would actually serve.
+
+    try:
+        # Check whether a model request would be served, and at whose expense
+        api_response = api_instance.inference_preflight(model)
+        print("The response of InferenceApi->inference_preflight:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling InferenceApi->inference_preflight: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **model** | **str**| Model id or alias, optionally with a &#x60;:economy&#x60; tier suffix. It is resolved through the catalog exactly as the inference endpoints resolve it, so an alias and a tier view answer for the model that would actually serve. | 
+
+### Return type
+
+[**InferencePreflight**](InferencePreflight.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**404** | Model or resource not found (OpenAI error envelope). |  -  |
 **429** | Rate limit exceeded (OpenAI error envelope). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
+from typing import Optional
 from typing_extensions import Annotated
 from deeprelay_sdk.models.balance import Balance
 from deeprelay_sdk.models.create_crypto_deposit_request import CreateCryptoDepositRequest
@@ -24,6 +25,10 @@ from deeprelay_sdk.models.crypto_deposit import CryptoDeposit
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.subscription import Subscription
+from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
+from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
+from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest
+from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession
 from deeprelay_sdk.models.update_spending_limit_request import UpdateSpendingLimitRequest
 
 from deeprelay_sdk.api_client import ApiClient, RequestSerialized
@@ -322,6 +327,586 @@ class BillingApi:
         return self.api_client.param_serialize(
             method='POST',
             resource_path='/billing/deposits/crypto',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def create_subscription_checkout(
+        self,
+        subscription_checkout_request: Optional[SubscriptionCheckoutRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> SubscriptionCheckoutSession:
+        """Start a subscription checkout session
+
+        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+
+        :param subscription_checkout_request:
+        :type subscription_checkout_request: SubscriptionCheckoutRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_checkout_serialize(
+            subscription_checkout_request=subscription_checkout_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionCheckoutSession",
+            '403': "Problem",
+            '409': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def create_subscription_checkout_with_http_info(
+        self,
+        subscription_checkout_request: Optional[SubscriptionCheckoutRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[SubscriptionCheckoutSession]:
+        """Start a subscription checkout session
+
+        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+
+        :param subscription_checkout_request:
+        :type subscription_checkout_request: SubscriptionCheckoutRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_checkout_serialize(
+            subscription_checkout_request=subscription_checkout_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionCheckoutSession",
+            '403': "Problem",
+            '409': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def create_subscription_checkout_without_preload_content(
+        self,
+        subscription_checkout_request: Optional[SubscriptionCheckoutRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Start a subscription checkout session
+
+        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+
+        :param subscription_checkout_request:
+        :type subscription_checkout_request: SubscriptionCheckoutRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_checkout_serialize(
+            subscription_checkout_request=subscription_checkout_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionCheckoutSession",
+            '403': "Problem",
+            '409': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_subscription_checkout_serialize(
+        self,
+        subscription_checkout_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if subscription_checkout_request is not None:
+            _body_params = subscription_checkout_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json', 
+                    'application/problem+json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/billing/subscription/checkout',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def create_subscription_portal(
+        self,
+        subscription_portal_request: Optional[SubscriptionPortalRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> SubscriptionPortalSession:
+        """Open the billing portal to cancel or manage the subscription
+
+        Returns a URL for the hosted billing portal: where a customer cancels the subscription, resumes one they cancelled, changes payment method, or downloads invoices. Requires the `billing:write` scope AND organization-admin privileges.  Cancellation lives here rather than on its own endpoint because it is one surface with the rest of the billing lifecycle. The common reason a subscription is about to lapse is a declined card, and the fix for that is a new card, not a cancellation — sending a customer somewhere that can only cancel would lose renewals.  Cancelling in the portal ends the subscription at the close of the current period; coverage continues until then and `/billing/subscription` reports `cancel_at_period_end: true`.  An organization that has never paid for anything gets 404: there is no billing account to manage, and this endpoint deliberately does not create one as a side effect of looking. 
+
+        :param subscription_portal_request:
+        :type subscription_portal_request: SubscriptionPortalRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_portal_serialize(
+            subscription_portal_request=subscription_portal_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionPortalSession",
+            '403': "Problem",
+            '404': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def create_subscription_portal_with_http_info(
+        self,
+        subscription_portal_request: Optional[SubscriptionPortalRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[SubscriptionPortalSession]:
+        """Open the billing portal to cancel or manage the subscription
+
+        Returns a URL for the hosted billing portal: where a customer cancels the subscription, resumes one they cancelled, changes payment method, or downloads invoices. Requires the `billing:write` scope AND organization-admin privileges.  Cancellation lives here rather than on its own endpoint because it is one surface with the rest of the billing lifecycle. The common reason a subscription is about to lapse is a declined card, and the fix for that is a new card, not a cancellation — sending a customer somewhere that can only cancel would lose renewals.  Cancelling in the portal ends the subscription at the close of the current period; coverage continues until then and `/billing/subscription` reports `cancel_at_period_end: true`.  An organization that has never paid for anything gets 404: there is no billing account to manage, and this endpoint deliberately does not create one as a side effect of looking. 
+
+        :param subscription_portal_request:
+        :type subscription_portal_request: SubscriptionPortalRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_portal_serialize(
+            subscription_portal_request=subscription_portal_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionPortalSession",
+            '403': "Problem",
+            '404': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def create_subscription_portal_without_preload_content(
+        self,
+        subscription_portal_request: Optional[SubscriptionPortalRequest] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Open the billing portal to cancel or manage the subscription
+
+        Returns a URL for the hosted billing portal: where a customer cancels the subscription, resumes one they cancelled, changes payment method, or downloads invoices. Requires the `billing:write` scope AND organization-admin privileges.  Cancellation lives here rather than on its own endpoint because it is one surface with the rest of the billing lifecycle. The common reason a subscription is about to lapse is a declined card, and the fix for that is a new card, not a cancellation — sending a customer somewhere that can only cancel would lose renewals.  Cancelling in the portal ends the subscription at the close of the current period; coverage continues until then and `/billing/subscription` reports `cancel_at_period_end: true`.  An organization that has never paid for anything gets 404: there is no billing account to manage, and this endpoint deliberately does not create one as a side effect of looking. 
+
+        :param subscription_portal_request:
+        :type subscription_portal_request: SubscriptionPortalRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_subscription_portal_serialize(
+            subscription_portal_request=subscription_portal_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "SubscriptionPortalSession",
+            '403': "Problem",
+            '404': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_subscription_portal_serialize(
+        self,
+        subscription_portal_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if subscription_portal_request is not None:
+            _body_params = subscription_portal_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json', 
+                    'application/problem+json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/billing/subscription/portal',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -32,6 +32,7 @@ from deeprelay_sdk.models.images_generations_request import ImagesGenerationsReq
 from deeprelay_sdk.models.images_response import ImagesResponse
 from deeprelay_sdk.models.images_response_data_inner import ImagesResponseDataInner
 from deeprelay_sdk.models.images_response_usage import ImagesResponseUsage
+from deeprelay_sdk.models.inference_preflight import InferencePreflight
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response
 from deeprelay_sdk.models.model import Model
 from deeprelay_sdk.models.model_list import ModelList
@@ -48,7 +49,11 @@ from deeprelay_sdk.models.problem import Problem
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions
 from deeprelay_sdk.models.subscription import Subscription
+from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
+from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan
+from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest
+from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession
 from deeprelay_sdk.models.subscription_price import SubscriptionPrice
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota
 from deeprelay_sdk.models.subscription_usage import SubscriptionUsage

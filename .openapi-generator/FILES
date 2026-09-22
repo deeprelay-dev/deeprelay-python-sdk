@@ -31,6 +31,7 @@ deeprelay_sdk/models/images_generations_request.py
 deeprelay_sdk/models/images_response.py
 deeprelay_sdk/models/images_response_data_inner.py
 deeprelay_sdk/models/images_response_usage.py
+deeprelay_sdk/models/inference_preflight.py
 deeprelay_sdk/models/list_deposits200_response.py
 deeprelay_sdk/models/model.py
 deeprelay_sdk/models/model_list.py
@@ -47,7 +48,11 @@ deeprelay_sdk/models/problem.py
 deeprelay_sdk/models/spending_limit.py
 deeprelay_sdk/models/stream_options.py
 deeprelay_sdk/models/subscription.py
+deeprelay_sdk/models/subscription_checkout_request.py
+deeprelay_sdk/models/subscription_checkout_session.py
 deeprelay_sdk/models/subscription_plan.py
+deeprelay_sdk/models/subscription_portal_request.py
+deeprelay_sdk/models/subscription_portal_session.py
 deeprelay_sdk/models/subscription_price.py
 deeprelay_sdk/models/subscription_quota.py
 deeprelay_sdk/models/subscription_usage.py
@@ -82,6 +87,7 @@ docs/ImagesResponse.md
 docs/ImagesResponseDataInner.md
 docs/ImagesResponseUsage.md
 docs/InferenceApi.md
+docs/InferencePreflight.md
 docs/ListDeposits200Response.md
 docs/MetaApi.md
 docs/Model.md
@@ -100,7 +106,11 @@ docs/Problem.md
 docs/SpendingLimit.md
 docs/StreamOptions.md
 docs/Subscription.md
+docs/SubscriptionCheckoutRequest.md
+docs/SubscriptionCheckoutSession.md
 docs/SubscriptionPlan.md
+docs/SubscriptionPortalRequest.md
+docs/SubscriptionPortalSession.md
 docs/SubscriptionPrice.md
 docs/SubscriptionQuota.md
 docs/SubscriptionUsage.md

@@ -5,6 +5,8 @@ All URIs are relative to *https://api.deeprelay.ai/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_crypto_deposit**](BillingApi.md#create_crypto_deposit) | **POST** /billing/deposits/crypto | Create a stablecoin deposit
+[**create_subscription_checkout**](BillingApi.md#create_subscription_checkout) | **POST** /billing/subscription/checkout | Start a subscription checkout session
+[**create_subscription_portal**](BillingApi.md#create_subscription_portal) | **POST** /billing/subscription/portal | Open the billing portal to cancel or manage the subscription
 [**get_balance**](BillingApi.md#get_balance) | **GET** /billing/balance | Get the org credit balance
 [**get_deposit**](BillingApi.md#get_deposit) | **GET** /billing/deposits/{id} | Get one stablecoin deposit
 [**get_spending_limit**](BillingApi.md#get_spending_limit) | **GET** /billing/spending-limit | Get the org spending limit
@@ -95,6 +97,190 @@ Name | Type | Description  | Notes
 **404** | Error response (RFC 7807) |  -  |
 **429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 **503** | &#x60;payment-source-unavailable&#x60; — deposits are temporarily unavailable; retry shortly. |  -  |
+**0** | Error response (RFC 7807) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **create_subscription_checkout**
+> SubscriptionCheckoutSession create_subscription_checkout(subscription_checkout_request=subscription_checkout_request)
+
+Start a subscription checkout session
+
+Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.
+
+This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.
+
+`success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means "use every default".
+
+`plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.
+
+One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409.
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
+from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.BillingApi(api_client)
+    subscription_checkout_request = deeprelay_sdk.SubscriptionCheckoutRequest() # SubscriptionCheckoutRequest |  (optional)
+
+    try:
+        # Start a subscription checkout session
+        api_response = api_instance.create_subscription_checkout(subscription_checkout_request=subscription_checkout_request)
+        print("The response of BillingApi->create_subscription_checkout:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling BillingApi->create_subscription_checkout: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **subscription_checkout_request** | [**SubscriptionCheckoutRequest**](SubscriptionCheckoutRequest.md)|  | [optional] 
+
+### Return type
+
+[**SubscriptionCheckoutSession**](SubscriptionCheckoutSession.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**403** | Not an organization admin |  -  |
+**409** | The organization already has an active subscription |  -  |
+**503** | Subscription billing is not configured on this deployment |  -  |
+**429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
+**0** | Error response (RFC 7807) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **create_subscription_portal**
+> SubscriptionPortalSession create_subscription_portal(subscription_portal_request=subscription_portal_request)
+
+Open the billing portal to cancel or manage the subscription
+
+Returns a URL for the hosted billing portal: where a customer cancels the subscription, resumes one they cancelled, changes payment method, or downloads invoices. Requires the `billing:write` scope AND organization-admin privileges.
+
+Cancellation lives here rather than on its own endpoint because it is one surface with the rest of the billing lifecycle. The common reason a subscription is about to lapse is a declined card, and the fix for that is a new card, not a cancellation — sending a customer somewhere that can only cancel would lose renewals.
+
+Cancelling in the portal ends the subscription at the close of the current period; coverage continues until then and `/billing/subscription` reports `cancel_at_period_end: true`.
+
+An organization that has never paid for anything gets 404: there is no billing account to manage, and this endpoint deliberately does not create one as a side effect of looking.
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest
+from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.BillingApi(api_client)
+    subscription_portal_request = deeprelay_sdk.SubscriptionPortalRequest() # SubscriptionPortalRequest |  (optional)
+
+    try:
+        # Open the billing portal to cancel or manage the subscription
+        api_response = api_instance.create_subscription_portal(subscription_portal_request=subscription_portal_request)
+        print("The response of BillingApi->create_subscription_portal:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling BillingApi->create_subscription_portal: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **subscription_portal_request** | [**SubscriptionPortalRequest**](SubscriptionPortalRequest.md)|  | [optional] 
+
+### Return type
+
+[**SubscriptionPortalSession**](SubscriptionPortalSession.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**403** | Not an organization admin |  -  |
+**404** | The organization has no billing account yet |  -  |
+**503** | Subscription billing is not configured on this deployment |  -  |
+**429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 **0** | Error response (RFC 7807) |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
