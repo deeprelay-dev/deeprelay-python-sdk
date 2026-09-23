@@ -45,6 +45,8 @@ deeprelay_sdk/models/operation_error.py
 deeprelay_sdk/models/operation_result.py
 deeprelay_sdk/models/peak_window.py
 deeprelay_sdk/models/problem.py
+deeprelay_sdk/models/referee_status.py
+deeprelay_sdk/models/referral.py
 deeprelay_sdk/models/spending_limit.py
 deeprelay_sdk/models/stream_options.py
 deeprelay_sdk/models/subscription.py
@@ -103,6 +105,8 @@ docs/OperationResult.md
 docs/OperationsApi.md
 docs/PeakWindow.md
 docs/Problem.md
+docs/RefereeStatus.md
+docs/Referral.md
 docs/SpendingLimit.md
 docs/StreamOptions.md
 docs/Subscription.md

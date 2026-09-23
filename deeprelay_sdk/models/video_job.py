@@ -39,8 +39,9 @@ class VideoJob(BaseModel):
     completed_at: Optional[StrictInt] = Field(default=None, description="Unix timestamp (seconds) when the job completed.")
     expires_at: Optional[StrictInt] = Field(default=None, description="Unix timestamp (seconds) when the artifact expires (24h after completion).")
     error: Optional[StrictStr] = Field(default=None, description="Canonical failure code when status is failed.")
+    error_message: Optional[StrictStr] = Field(default=None, description="Human-readable reason behind `error`, when the upstream supplied one. `error` classifies the failure, `error_message` explains it (for example a requested duration outside the model's supported range). Sanitized before storage; only ever present alongside `error`.")
     cost_cents: Optional[StrictInt] = Field(default=None, description="Final billed cost in cents; present once the job completes (failed/cancelled jobs are never billed).")
-    __properties: ClassVar[List[str]] = ["id", "object", "model", "status", "progress", "size", "seconds", "created_at", "completed_at", "expires_at", "error", "cost_cents"]
+    __properties: ClassVar[List[str]] = ["id", "object", "model", "status", "progress", "size", "seconds", "created_at", "completed_at", "expires_at", "error", "error_message", "cost_cents"]
 
     @field_validator('object')
     def object_validate_enum(cls, value):
@@ -118,6 +119,7 @@ class VideoJob(BaseModel):
             "completed_at": obj.get("completed_at"),
             "expires_at": obj.get("expires_at"),
             "error": obj.get("error"),
+            "error_message": obj.get("error_message"),
             "cost_cents": obj.get("cost_cents")
         })
         return _obj

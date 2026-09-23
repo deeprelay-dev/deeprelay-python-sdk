@@ -343,9 +343,7 @@ class UsageApi:
                 _query_params.append(
                     (
                         'start',
-                        start.strftime(
-                            self.api_client.configuration.datetime_format
-                        )
+                        start.isoformat()
                     )
                 )
             else:
@@ -356,9 +354,7 @@ class UsageApi:
                 _query_params.append(
                     (
                         'end',
-                        end.strftime(
-                            self.api_client.configuration.datetime_format
-                        )
+                        end.isoformat()
                     )
                 )
             else:

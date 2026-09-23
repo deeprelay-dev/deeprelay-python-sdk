@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Define package exports
 __all__ = [
@@ -66,6 +66,8 @@ __all__ = [
     "OperationResult",
     "PeakWindow",
     "Problem",
+    "RefereeStatus",
+    "Referral",
     "SpendingLimit",
     "StreamOptions",
     "Subscription",
@@ -140,6 +142,8 @@ from deeprelay_sdk.models.operation_error import OperationError as OperationErro
 from deeprelay_sdk.models.operation_result import OperationResult as OperationResult
 from deeprelay_sdk.models.peak_window import PeakWindow as PeakWindow
 from deeprelay_sdk.models.problem import Problem as Problem
+from deeprelay_sdk.models.referee_status import RefereeStatus as RefereeStatus
+from deeprelay_sdk.models.referral import Referral as Referral
 from deeprelay_sdk.models.spending_limit import SpendingLimit as SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions as StreamOptions
 from deeprelay_sdk.models.subscription import Subscription as Subscription

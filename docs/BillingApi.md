@@ -9,6 +9,7 @@ Method | HTTP request | Description
 [**create_subscription_portal**](BillingApi.md#create_subscription_portal) | **POST** /billing/subscription/portal | Open the billing portal to cancel or manage the subscription
 [**get_balance**](BillingApi.md#get_balance) | **GET** /billing/balance | Get the org credit balance
 [**get_deposit**](BillingApi.md#get_deposit) | **GET** /billing/deposits/{id} | Get one stablecoin deposit
+[**get_referral**](BillingApi.md#get_referral) | **GET** /referrals | Get the org referral code, invite link, terms and stats
 [**get_spending_limit**](BillingApi.md#get_spending_limit) | **GET** /billing/spending-limit | Get the org spending limit
 [**get_subscription**](BillingApi.md#get_subscription) | **GET** /billing/subscription | Get the org subscription status and quota usage
 [**list_deposits**](BillingApi.md#list_deposits) | **GET** /billing/deposits | List stablecoin deposits
@@ -443,6 +444,87 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **404** | &#x60;deposit-not-found&#x60; — no such deposit, or it belongs to another organization. &#x60;not-found&#x60; — the feature is not enabled.  |  -  |
+**429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
+**0** | Error response (RFC 7807) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_referral**
+> Referral get_referral()
+
+Get the org referral code, invite link, terms and stats
+
+Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.
+
+The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The terms ride on the wire so a client never hard-codes the amounts.
+
+`referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads.
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.models.referral import Referral
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.BillingApi(api_client)
+
+    try:
+        # Get the org referral code, invite link, terms and stats
+        api_response = api_instance.get_referral()
+        print("The response of BillingApi->get_referral:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling BillingApi->get_referral: %s\n" % e)
+```
+
+
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**Referral**](Referral.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/problem+json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
 **429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 **0** | Error response (RFC 7807) |  -  |
 

@@ -46,6 +46,8 @@ from deeprelay_sdk.models.operation_error import OperationError
 from deeprelay_sdk.models.operation_result import OperationResult
 from deeprelay_sdk.models.peak_window import PeakWindow
 from deeprelay_sdk.models.problem import Problem
+from deeprelay_sdk.models.referee_status import RefereeStatus
+from deeprelay_sdk.models.referral import Referral
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions
 from deeprelay_sdk.models.subscription import Subscription

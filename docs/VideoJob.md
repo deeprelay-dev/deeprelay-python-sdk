@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **completed_at** | **int** | Unix timestamp (seconds) when the job completed. | [optional] 
 **expires_at** | **int** | Unix timestamp (seconds) when the artifact expires (24h after completion). | [optional] 
 **error** | **str** | Canonical failure code when status is failed. | [optional] 
+**error_message** | **str** | Human-readable reason behind &#x60;error&#x60;, when the upstream supplied one. &#x60;error&#x60; classifies the failure, &#x60;error_message&#x60; explains it (for example a requested duration outside the model&#39;s supported range). Sanitized before storage; only ever present alongside &#x60;error&#x60;. | [optional] 
 **cost_cents** | **int** | Final billed cost in cents; present once the job completes (failed/cancelled jobs are never billed). | [optional] 
 
 ## Example
