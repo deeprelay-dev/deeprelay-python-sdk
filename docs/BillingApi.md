@@ -7,6 +7,7 @@ Method | HTTP request | Description
 [**create_crypto_deposit**](BillingApi.md#create_crypto_deposit) | **POST** /billing/deposits/crypto | Create a stablecoin deposit
 [**create_subscription_checkout**](BillingApi.md#create_subscription_checkout) | **POST** /billing/subscription/checkout | Start a subscription checkout session
 [**create_subscription_portal**](BillingApi.md#create_subscription_portal) | **POST** /billing/subscription/portal | Open the billing portal to cancel or manage the subscription
+[**delete_spending_limit**](BillingApi.md#delete_spending_limit) | **DELETE** /billing/spending-limit | Clear the org spending limit
 [**get_balance**](BillingApi.md#get_balance) | **GET** /billing/balance | Get the org credit balance
 [**get_deposit**](BillingApi.md#get_deposit) | **GET** /billing/deposits/{id} | Get one stablecoin deposit
 [**get_referral**](BillingApi.md#get_referral) | **GET** /referrals | Get the org referral code, invite link, terms and stats
@@ -281,6 +282,82 @@ Name | Type | Description  | Notes
 **403** | Not an organization admin |  -  |
 **404** | The organization has no billing account yet |  -  |
 **503** | Subscription billing is not configured on this deployment |  -  |
+**429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
+**0** | Error response (RFC 7807) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **delete_spending_limit**
+> delete_spending_limit()
+
+Clear the org spending limit
+
+Removes the organization's monthly spending limit and daily spend cap entirely. Requires the `billing:write` scope AND org-admin privileges (a non-admin member gets 403). Returns 404 when no limit is configured. This is the only way to remove a limit through the API, because `PUT` floors `monthly_limit_dollars` at 1.00 and so cannot express "no limit".
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.BillingApi(api_client)
+
+    try:
+        # Clear the org spending limit
+        api_instance.delete_spending_limit()
+    except Exception as e:
+        print("Exception when calling BillingApi->delete_spending_limit: %s\n" % e)
+```
+
+
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/problem+json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**204** | No Content |  -  |
+**403** | Error response (RFC 7807) |  -  |
+**404** | Error response (RFC 7807) |  -  |
 **429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 **0** | Error response (RFC 7807) |  -  |
 

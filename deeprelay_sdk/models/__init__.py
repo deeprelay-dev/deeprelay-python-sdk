@@ -41,9 +41,6 @@ from deeprelay_sdk.models.model_pricing import ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate
 from deeprelay_sdk.models.open_ai_error_envelope import OpenAIErrorEnvelope
 from deeprelay_sdk.models.open_ai_error_envelope_error import OpenAIErrorEnvelopeError
-from deeprelay_sdk.models.operation import Operation
-from deeprelay_sdk.models.operation_error import OperationError
-from deeprelay_sdk.models.operation_result import OperationResult
 from deeprelay_sdk.models.peak_window import PeakWindow
 from deeprelay_sdk.models.problem import Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus

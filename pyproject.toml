@@ -6,7 +6,7 @@ name = "deeprelay-sdk"
 # injected tree. This file is ignore-protected (see .openapi-generator-ignore)
 # so the placeholder survives regeneration; sdk/release/assert-placeholder.sh
 # fails CI if a real version ever lands here.
-version = "0.1.2"
+version = "0.2.0"
 description = "deeprelay Public Developer API"
 authors = [
   {name = "deeprelay Support",email = "support@deeprelay.ai"},

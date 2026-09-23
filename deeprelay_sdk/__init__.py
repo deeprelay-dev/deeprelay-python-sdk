@@ -15,14 +15,13 @@
 """  # noqa: E501
 
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 # Define package exports
 __all__ = [
     "BillingApi",
     "InferenceApi",
     "MetaApi",
-    "OperationsApi",
     "UsageApi",
     "WebhooksApi",
     "ApiResponse",
@@ -61,9 +60,6 @@ __all__ = [
     "ModelRate",
     "OpenAIErrorEnvelope",
     "OpenAIErrorEnvelopeError",
-    "Operation",
-    "OperationError",
-    "OperationResult",
     "PeakWindow",
     "Problem",
     "RefereeStatus",
@@ -94,7 +90,6 @@ __all__ = [
 from deeprelay_sdk.api.billing_api import BillingApi as BillingApi
 from deeprelay_sdk.api.inference_api import InferenceApi as InferenceApi
 from deeprelay_sdk.api.meta_api import MetaApi as MetaApi
-from deeprelay_sdk.api.operations_api import OperationsApi as OperationsApi
 from deeprelay_sdk.api.usage_api import UsageApi as UsageApi
 from deeprelay_sdk.api.webhooks_api import WebhooksApi as WebhooksApi
 
@@ -137,9 +132,6 @@ from deeprelay_sdk.models.model_pricing import ModelPricing as ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate as ModelRate
 from deeprelay_sdk.models.open_ai_error_envelope import OpenAIErrorEnvelope as OpenAIErrorEnvelope
 from deeprelay_sdk.models.open_ai_error_envelope_error import OpenAIErrorEnvelopeError as OpenAIErrorEnvelopeError
-from deeprelay_sdk.models.operation import Operation as Operation
-from deeprelay_sdk.models.operation_error import OperationError as OperationError
-from deeprelay_sdk.models.operation_result import OperationResult as OperationResult
 from deeprelay_sdk.models.peak_window import PeakWindow as PeakWindow
 from deeprelay_sdk.models.problem import Problem as Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus as RefereeStatus

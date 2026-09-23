@@ -5,7 +5,6 @@ deeprelay_sdk/api/__init__.py
 deeprelay_sdk/api/billing_api.py
 deeprelay_sdk/api/inference_api.py
 deeprelay_sdk/api/meta_api.py
-deeprelay_sdk/api/operations_api.py
 deeprelay_sdk/api/usage_api.py
 deeprelay_sdk/api/webhooks_api.py
 deeprelay_sdk/api_client.py
@@ -40,9 +39,6 @@ deeprelay_sdk/models/model_pricing.py
 deeprelay_sdk/models/model_rate.py
 deeprelay_sdk/models/open_ai_error_envelope.py
 deeprelay_sdk/models/open_ai_error_envelope_error.py
-deeprelay_sdk/models/operation.py
-deeprelay_sdk/models/operation_error.py
-deeprelay_sdk/models/operation_result.py
 deeprelay_sdk/models/peak_window.py
 deeprelay_sdk/models/problem.py
 deeprelay_sdk/models/referee_status.py
@@ -99,10 +95,6 @@ docs/ModelPricing.md
 docs/ModelRate.md
 docs/OpenAIErrorEnvelope.md
 docs/OpenAIErrorEnvelopeError.md
-docs/Operation.md
-docs/OperationError.md
-docs/OperationResult.md
-docs/OperationsApi.md
 docs/PeakWindow.md
 docs/Problem.md
 docs/RefereeStatus.md
