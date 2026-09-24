@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,14 +27,19 @@ from pydantic_core import to_jsonable_python
 
 class UsageBucket(BaseModel):
     """
-    UsageBucket
+    One `/usage` row. Every row carries `bucket_start`, `gpu_seconds` and `cost_cents`. When the request set `modality` or `model` the row is an inference-usage row: it also carries `modality`, `model`, `prompt_tokens`, `completion_tokens` and `image_count` (aggregating every serverless inference call in the bucket for that modality and model), and `gpu_seconds` is always 0. Otherwise it is an instance-usage row, carrying `instance_id` / `gpu_type` when `group_by` asked for them. 
     """ # noqa: E501
-    bucket_start: datetime
-    instance_id: Optional[StrictStr] = None
-    gpu_type: Optional[StrictStr] = None
-    gpu_seconds: StrictInt
-    cost_cents: StrictInt
-    __properties: ClassVar[List[str]] = ["bucket_start", "instance_id", "gpu_type", "gpu_seconds", "cost_cents"]
+    bucket_start: datetime = Field(description="Start of the time bucket (truncated to `bucket`).")
+    instance_id: Optional[StrictStr] = Field(default=None, description="Instance-usage rows with `group_by=instance_id` only.")
+    gpu_type: Optional[StrictStr] = Field(default=None, description="Instance-usage rows with `group_by=gpu_type` only.")
+    gpu_seconds: StrictInt = Field(description="GPU instance seconds billed in the bucket. Always 0 on inference-usage rows.")
+    cost_cents: StrictInt = Field(description="Total cost of the row, in US cents.")
+    modality: Optional[StrictStr] = Field(default=None, description="Inference-usage rows only: the modality of the calls in this row (chat, image, video or embedding). ")
+    model: Optional[StrictStr] = Field(default=None, description="Inference-usage rows only: the model `id` the calls in this row were made against. ")
+    prompt_tokens: Optional[StrictInt] = Field(default=None, description="Inference-usage rows only. Sum of input tokens; 0 for modalities not billed per token.")
+    completion_tokens: Optional[StrictInt] = Field(default=None, description="Inference-usage rows only. Sum of output tokens; 0 for modalities not billed per token.")
+    image_count: Optional[StrictInt] = Field(default=None, description="Inference-usage rows only. Sum of generated images; 0 for non-image modalities.")
+    __properties: ClassVar[List[str]] = ["bucket_start", "instance_id", "gpu_type", "gpu_seconds", "cost_cents", "modality", "model", "prompt_tokens", "completion_tokens", "image_count"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -91,7 +96,12 @@ class UsageBucket(BaseModel):
             "instance_id": obj.get("instance_id"),
             "gpu_type": obj.get("gpu_type"),
             "gpu_seconds": obj.get("gpu_seconds"),
-            "cost_cents": obj.get("cost_cents")
+            "cost_cents": obj.get("cost_cents"),
+            "modality": obj.get("modality"),
+            "model": obj.get("model"),
+            "prompt_tokens": obj.get("prompt_tokens"),
+            "completion_tokens": obj.get("completion_tokens"),
+            "image_count": obj.get("image_count")
         })
         return _obj
 

@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**List[UsageBucket]**](UsageBucket.md) |  | 
+**data** | [**List[UsageBucket]**](UsageBucket.md) | Inference-usage rows when the request set &#x60;modality&#x60; or &#x60;model&#x60;; instance-usage rows otherwise. One page never mixes the two.  | 
 **next_cursor** | **str** |  | 
 
 ## Example

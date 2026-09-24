@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from deeprelay_sdk.models.usage_bucket import UsageBucket
 from typing import Optional, Set
@@ -29,7 +29,7 @@ class UsagePage(BaseModel):
     """
     UsagePage
     """ # noqa: E501
-    data: List[UsageBucket]
+    data: List[UsageBucket] = Field(description="Inference-usage rows when the request set `modality` or `model`; instance-usage rows otherwise. One page never mixes the two. ")
     next_cursor: Optional[StrictStr]
     __properties: ClassVar[List[str]] = ["data", "next_cursor"]
 

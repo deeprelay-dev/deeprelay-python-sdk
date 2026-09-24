@@ -43,12 +43,14 @@ class UsageApi:
     @validate_call
     def list_usage(
         self,
-        bucket: Optional[StrictStr] = None,
-        group_by: Optional[StrictStr] = None,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None,
+        bucket: Annotated[Optional[StrictStr], Field(description="Bucket width. Defaults to `day`.")] = None,
+        group_by: Annotated[Optional[StrictStr], Field(description="Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. ")] = None,
+        start: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to 30 days ago.")] = None,
+        end: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `start`.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
+        modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
+        model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -64,19 +66,24 @@ class UsageApi:
     ) -> UsagePage:
         """Time-bucketed usage
 
+        Returns spend aggregated into time buckets over `[start, end)` (default: the last 30 days, `bucket=day`), newest bucket first.  The response has one of two row shapes, selected by the query:  - **Inference usage** — set `modality` and/or `model`. Rows aggregate serverless inference calls, one row per (bucket, modality, model), and carry `modality`, `model`, `prompt_tokens`, `completion_tokens` and `image_count`. This is the usage a serverless-inference customer is billed for. - **Instance usage** — neither `modality` nor `model` set. Rows aggregate GPU instance billing sessions, optionally split by `group_by`. With no instance usage this returns an empty `data` array, so to read inference spend always pass `modality` or `model`.  Requires the `billing:read` scope. 
 
-        :param bucket:
+        :param bucket: Bucket width. Defaults to `day`.
         :type bucket: str
-        :param group_by:
+        :param group_by: Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. 
         :type group_by: str
-        :param start:
+        :param start: Inclusive RFC 3339 range start. Defaults to 30 days ago.
         :type start: datetime
-        :param end:
+        :param end: Exclusive RFC 3339 range end. Defaults to now; must be after `start`.
         :type end: datetime
         :param cursor:
         :type cursor: str
         :param limit:
         :type limit: int
+        :param modality: Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. 
+        :type modality: str
+        :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
+        :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -106,6 +113,8 @@ class UsageApi:
             end=end,
             cursor=cursor,
             limit=limit,
+            modality=modality,
+            model=model,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -131,12 +140,14 @@ class UsageApi:
     @validate_call
     def list_usage_with_http_info(
         self,
-        bucket: Optional[StrictStr] = None,
-        group_by: Optional[StrictStr] = None,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None,
+        bucket: Annotated[Optional[StrictStr], Field(description="Bucket width. Defaults to `day`.")] = None,
+        group_by: Annotated[Optional[StrictStr], Field(description="Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. ")] = None,
+        start: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to 30 days ago.")] = None,
+        end: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `start`.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
+        modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
+        model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -152,19 +163,24 @@ class UsageApi:
     ) -> ApiResponse[UsagePage]:
         """Time-bucketed usage
 
+        Returns spend aggregated into time buckets over `[start, end)` (default: the last 30 days, `bucket=day`), newest bucket first.  The response has one of two row shapes, selected by the query:  - **Inference usage** — set `modality` and/or `model`. Rows aggregate serverless inference calls, one row per (bucket, modality, model), and carry `modality`, `model`, `prompt_tokens`, `completion_tokens` and `image_count`. This is the usage a serverless-inference customer is billed for. - **Instance usage** — neither `modality` nor `model` set. Rows aggregate GPU instance billing sessions, optionally split by `group_by`. With no instance usage this returns an empty `data` array, so to read inference spend always pass `modality` or `model`.  Requires the `billing:read` scope. 
 
-        :param bucket:
+        :param bucket: Bucket width. Defaults to `day`.
         :type bucket: str
-        :param group_by:
+        :param group_by: Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. 
         :type group_by: str
-        :param start:
+        :param start: Inclusive RFC 3339 range start. Defaults to 30 days ago.
         :type start: datetime
-        :param end:
+        :param end: Exclusive RFC 3339 range end. Defaults to now; must be after `start`.
         :type end: datetime
         :param cursor:
         :type cursor: str
         :param limit:
         :type limit: int
+        :param modality: Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. 
+        :type modality: str
+        :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
+        :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -194,6 +210,8 @@ class UsageApi:
             end=end,
             cursor=cursor,
             limit=limit,
+            modality=modality,
+            model=model,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -219,12 +237,14 @@ class UsageApi:
     @validate_call
     def list_usage_without_preload_content(
         self,
-        bucket: Optional[StrictStr] = None,
-        group_by: Optional[StrictStr] = None,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None,
+        bucket: Annotated[Optional[StrictStr], Field(description="Bucket width. Defaults to `day`.")] = None,
+        group_by: Annotated[Optional[StrictStr], Field(description="Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. ")] = None,
+        start: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to 30 days ago.")] = None,
+        end: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `start`.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
+        modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
+        model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -240,19 +260,24 @@ class UsageApi:
     ) -> RESTResponseType:
         """Time-bucketed usage
 
+        Returns spend aggregated into time buckets over `[start, end)` (default: the last 30 days, `bucket=day`), newest bucket first.  The response has one of two row shapes, selected by the query:  - **Inference usage** — set `modality` and/or `model`. Rows aggregate serverless inference calls, one row per (bucket, modality, model), and carry `modality`, `model`, `prompt_tokens`, `completion_tokens` and `image_count`. This is the usage a serverless-inference customer is billed for. - **Instance usage** — neither `modality` nor `model` set. Rows aggregate GPU instance billing sessions, optionally split by `group_by`. With no instance usage this returns an empty `data` array, so to read inference spend always pass `modality` or `model`.  Requires the `billing:read` scope. 
 
-        :param bucket:
+        :param bucket: Bucket width. Defaults to `day`.
         :type bucket: str
-        :param group_by:
+        :param group_by: Split instance-usage rows by instance or GPU type. Applies only to the instance-usage shape (neither `modality` nor `model` set); ignored when either is set, since inference rows are always split by modality and model. 
         :type group_by: str
-        :param start:
+        :param start: Inclusive RFC 3339 range start. Defaults to 30 days ago.
         :type start: datetime
-        :param end:
+        :param end: Exclusive RFC 3339 range end. Defaults to now; must be after `start`.
         :type end: datetime
         :param cursor:
         :type cursor: str
         :param limit:
         :type limit: int
+        :param modality: Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. 
+        :type modality: str
+        :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
+        :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -282,6 +307,8 @@ class UsageApi:
             end=end,
             cursor=cursor,
             limit=limit,
+            modality=modality,
+            model=model,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -308,6 +335,8 @@ class UsageApi:
         end,
         cursor,
         limit,
+        modality,
+        model,
         _request_auth,
         _content_type,
         _headers,
@@ -367,6 +396,14 @@ class UsageApi:
         if limit is not None:
             
             _query_params.append(('limit', limit))
+            
+        if modality is not None:
+            
+            _query_params.append(('modality', modality))
+            
+        if model is not None:
+            
+            _query_params.append(('model', model))
             
         # process the header parameters
         # process the form parameters
