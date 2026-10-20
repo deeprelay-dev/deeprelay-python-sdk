@@ -23,7 +23,7 @@ Name | Type | Description | Notes
 **cached_tokens** | **int** |  | [optional] 
 **reasoning_tokens** | **int** |  | [optional] 
 **quota_units** | **int** | Weighted tokens drawn from the subscription quota. | [optional] 
-**cost** | **str** | The exact USD amount billed to the wallet, as a decimal string in the same format as &#x60;usage.cost&#x60;. &#x60;\&quot;0\&quot;&#x60; for a plan-covered, rejected or failed call. | 
+**cost** | **float** | The exact USD amount billed to the wallet, in the same format as &#x60;usage.cost&#x60;: an exact decimal with up to 8 places, emitted as a JSON number. &#x60;0&#x60; for a plan-covered, rejected or failed call. | 
 **cost_micro_cents** | **int** | The same amount as an integer number of micro-cents. | 
 **plan_covered** | **bool** | Whether the subscription plan paid for the call. | 
 **ttft_ms** | **int** | Time to first token, for a streamed call. | [optional] 

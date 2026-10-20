@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -46,7 +46,7 @@ class RequestLogEntry(BaseModel):
     cached_tokens: Optional[StrictInt] = None
     reasoning_tokens: Optional[StrictInt] = None
     quota_units: Optional[StrictInt] = Field(default=None, description="Weighted tokens drawn from the subscription quota.")
-    cost: StrictStr = Field(description="The exact USD amount billed to the wallet, as a decimal string in the same format as `usage.cost`. `\"0\"` for a plan-covered, rejected or failed call.")
+    cost: Union[StrictFloat, StrictInt] = Field(description="The exact USD amount billed to the wallet, in the same format as `usage.cost`: an exact decimal with up to 8 places, emitted as a JSON number. `0` for a plan-covered, rejected or failed call.")
     cost_micro_cents: StrictInt = Field(description="The same amount as an integer number of micro-cents.")
     plan_covered: StrictBool = Field(description="Whether the subscription plan paid for the call.")
     ttft_ms: Optional[StrictInt] = Field(default=None, description="Time to first token, for a streamed call.")
