@@ -11,6 +11,8 @@ Name | Type | Description | Notes
 **detail** | **str** |  | 
 **code** | **str** |  | 
 **request_id** | **str** |  | 
+**var_field** | **str** | On a 422 &#x60;validation_failed&#x60;, the request field that failed. | [optional] 
+**max_rows** | **int** | On a 422 &#x60;export_too_large&#x60;, the export row cap. | [optional] 
 
 ## Example
 

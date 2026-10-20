@@ -1,6 +1,6 @@
 # Subscription
 
-The organization's flat subscription tier: entitlement, billing period, the configured quota, and consumption against it. The console and this endpoint assemble it from the same source, so the two surfaces cannot report different numbers. 
+The organization's subscription: entitlement, billing period, the plan it is on with that plan's configured quota, consumption against it, and the plans this deployment offers. The console and this endpoint assemble it from the same source, so the two surfaces cannot report different numbers. 
 
 ## Properties
 
@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **plan** | [**SubscriptionPlan**](SubscriptionPlan.md) |  | 
 **quota** | [**SubscriptionQuota**](SubscriptionQuota.md) |  | 
 **usage** | [**SubscriptionUsage**](SubscriptionUsage.md) |  | [optional] 
+**plans** | [**List[SubscriptionTier]**](SubscriptionTier.md) | Every plan this deployment offers, smallest first (Base, then Plus when it is configured), each with its price and quota. The keys are the accepted &#x60;plan_key&#x60; values for checkout and upgrade. Empty when nothing can be bought here. | 
 
 ## Example
 

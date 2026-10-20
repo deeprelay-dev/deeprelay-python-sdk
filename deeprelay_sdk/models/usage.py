@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,8 +18,11 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from deeprelay_sdk.models.cost_details import CostDetails
+from deeprelay_sdk.models.usage_completion_tokens_details import UsageCompletionTokensDetails
+from deeprelay_sdk.models.usage_prompt_tokens_details import UsagePromptTokensDetails
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -31,7 +34,11 @@ class Usage(BaseModel):
     prompt_tokens: StrictInt
     completion_tokens: StrictInt
     total_tokens: StrictInt
-    __properties: ClassVar[List[str]] = ["prompt_tokens", "completion_tokens", "total_tokens"]
+    prompt_tokens_details: Optional[UsagePromptTokensDetails] = None
+    completion_tokens_details: Optional[UsageCompletionTokensDetails] = None
+    cost: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The amount charged for this call in USD: equal to cost_details.charged_amount, so 0 for a call covered by the flat subscription. An exact decimal with up to 8 places, emitted as a JSON number. On a stream it appears only in the final usage chunk. Your invoice is computed from the billing ledger, which prices the call from the same breakdown. ")
+    cost_details: Optional[CostDetails] = None
+    __properties: ClassVar[List[str]] = ["prompt_tokens", "completion_tokens", "total_tokens", "prompt_tokens_details", "completion_tokens_details", "cost", "cost_details"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -72,6 +79,15 @@ class Usage(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of prompt_tokens_details
+        if self.prompt_tokens_details:
+            _dict['prompt_tokens_details'] = self.prompt_tokens_details.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of completion_tokens_details
+        if self.completion_tokens_details:
+            _dict['completion_tokens_details'] = self.completion_tokens_details.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of cost_details
+        if self.cost_details:
+            _dict['cost_details'] = self.cost_details.to_dict()
         return _dict
 
     @classmethod
@@ -86,7 +102,11 @@ class Usage(BaseModel):
         _obj = cls.model_validate({
             "prompt_tokens": obj.get("prompt_tokens"),
             "completion_tokens": obj.get("completion_tokens"),
-            "total_tokens": obj.get("total_tokens")
+            "total_tokens": obj.get("total_tokens"),
+            "prompt_tokens_details": UsagePromptTokensDetails.from_dict(obj["prompt_tokens_details"]) if obj.get("prompt_tokens_details") is not None else None,
+            "completion_tokens_details": UsageCompletionTokensDetails.from_dict(obj["completion_tokens_details"]) if obj.get("completion_tokens_details") is not None else None,
+            "cost": obj.get("cost"),
+            "cost_details": CostDetails.from_dict(obj["cost_details"]) if obj.get("cost_details") is not None else None
         })
         return _obj
 

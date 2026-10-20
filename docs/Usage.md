@@ -8,6 +8,10 @@ Name | Type | Description | Notes
 **prompt_tokens** | **int** |  | 
 **completion_tokens** | **int** |  | 
 **total_tokens** | **int** |  | 
+**prompt_tokens_details** | [**UsagePromptTokensDetails**](UsagePromptTokensDetails.md) |  | [optional] 
+**completion_tokens_details** | [**UsageCompletionTokensDetails**](UsageCompletionTokensDetails.md) |  | [optional] 
+**cost** | **float** | The amount charged for this call in USD: equal to cost_details.charged_amount, so 0 for a call covered by the flat subscription. An exact decimal with up to 8 places, emitted as a JSON number. On a stream it appears only in the final usage chunk. Your invoice is computed from the billing ledger, which prices the call from the same breakdown.  | [optional] 
+**cost_details** | [**CostDetails**](CostDetails.md) |  | [optional] 
 
 ## Example
 

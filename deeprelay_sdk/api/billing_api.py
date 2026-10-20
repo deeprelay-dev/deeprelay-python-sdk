@@ -1,7 +1,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -30,6 +30,7 @@ from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheck
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest
 from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession
+from deeprelay_sdk.models.subscription_upgrade_request import SubscriptionUpgradeRequest
 from deeprelay_sdk.models.update_spending_limit_request import UpdateSpendingLimitRequest
 
 from deeprelay_sdk.api_client import ApiClient, RequestSerialized
@@ -362,7 +363,7 @@ class BillingApi:
     ) -> SubscriptionCheckoutSession:
         """Start a subscription checkout session
 
-        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+        Opens a hosted checkout session for a subscription plan and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\". When sent, they must be on the deployment's dashboard origin, else 422 `validation_failed`.  `plan_key` names the plan to buy: `flat` (Base, the default when the field is omitted) or `plus`. It pins the plan the client DISPLAYED — an unknown key, or a plan this deployment does not offer, is a 400 rather than a silent purchase of a different tier. The `plans` array on `/billing/subscription` lists the accepted keys.  One subscription per organization: a second checkout while an entitling subscription exists is a 409. To move an existing subscription to a bigger plan use `/billing/subscription/upgrade`.  `method` picks how the plan is paid: `card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay, India). On an organization that already subscribes, an explicit `method` in the other currency is a switch, not a second subscription: the link saves the new card or UPI AutoPay mandate (nothing is charged), and once that completes the same plan is moved to the new currency, first charged on the current renewal date (that month is already paid). The answer then carries `switch_to` and `first_charge_at`. A switch is refused (409) within two days of renewal, while the plan is set to cancel, while an upgrade waits on its UPI payment, and in the currency the plan already uses. 
 
         :param subscription_checkout_request:
         :type subscription_checkout_request: SubscriptionCheckoutRequest
@@ -434,7 +435,7 @@ class BillingApi:
     ) -> ApiResponse[SubscriptionCheckoutSession]:
         """Start a subscription checkout session
 
-        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+        Opens a hosted checkout session for a subscription plan and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\". When sent, they must be on the deployment's dashboard origin, else 422 `validation_failed`.  `plan_key` names the plan to buy: `flat` (Base, the default when the field is omitted) or `plus`. It pins the plan the client DISPLAYED — an unknown key, or a plan this deployment does not offer, is a 400 rather than a silent purchase of a different tier. The `plans` array on `/billing/subscription` lists the accepted keys.  One subscription per organization: a second checkout while an entitling subscription exists is a 409. To move an existing subscription to a bigger plan use `/billing/subscription/upgrade`.  `method` picks how the plan is paid: `card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay, India). On an organization that already subscribes, an explicit `method` in the other currency is a switch, not a second subscription: the link saves the new card or UPI AutoPay mandate (nothing is charged), and once that completes the same plan is moved to the new currency, first charged on the current renewal date (that month is already paid). The answer then carries `switch_to` and `first_charge_at`. A switch is refused (409) within two days of renewal, while the plan is set to cancel, while an upgrade waits on its UPI payment, and in the currency the plan already uses. 
 
         :param subscription_checkout_request:
         :type subscription_checkout_request: SubscriptionCheckoutRequest
@@ -506,7 +507,7 @@ class BillingApi:
     ) -> RESTResponseType:
         """Start a subscription checkout session
 
-        Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\".  `plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.  One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409. 
+        Opens a hosted checkout session for a subscription plan and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.  This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.  `success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means \"use every default\". When sent, they must be on the deployment's dashboard origin, else 422 `validation_failed`.  `plan_key` names the plan to buy: `flat` (Base, the default when the field is omitted) or `plus`. It pins the plan the client DISPLAYED — an unknown key, or a plan this deployment does not offer, is a 400 rather than a silent purchase of a different tier. The `plans` array on `/billing/subscription` lists the accepted keys.  One subscription per organization: a second checkout while an entitling subscription exists is a 409. To move an existing subscription to a bigger plan use `/billing/subscription/upgrade`.  `method` picks how the plan is paid: `card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay, India). On an organization that already subscribes, an explicit `method` in the other currency is a switch, not a second subscription: the link saves the new card or UPI AutoPay mandate (nothing is charged), and once that completes the same plan is moved to the new currency, first charged on the current renewal date (that month is already paid). The answer then carries `switch_to` and `first_charge_at`. A switch is refused (409) within two days of renewal, while the plan is set to cancel, while an upgrade waits on its UPI payment, and in the currency the plan already uses. 
 
         :param subscription_checkout_request:
         :type subscription_checkout_request: SubscriptionCheckoutRequest
@@ -1723,7 +1724,7 @@ class BillingApi:
     ) -> Referral:
         """Get the org referral code, invite link, terms and stats
 
-        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
+        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The referrer also earns `commission_pct` percent of every real deposit the friend makes, credited as spend-only promotional credit when the deposit clears (`commission_earned_cents`). Program rewards never apply to the subscription. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1788,7 +1789,7 @@ class BillingApi:
     ) -> ApiResponse[Referral]:
         """Get the org referral code, invite link, terms and stats
 
-        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
+        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The referrer also earns `commission_pct` percent of every real deposit the friend makes, credited as spend-only promotional credit when the deposit clears (`commission_earned_cents`). Program rewards never apply to the subscription. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1853,7 +1854,7 @@ class BillingApi:
     ) -> RESTResponseType:
         """Get the org referral code, invite link, terms and stats
 
-        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
+        Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The referrer also earns `commission_pct` percent of every real deposit the friend makes, credited as spend-only promotional credit when the deposit clears (`commission_earned_cents`). Program rewards never apply to the subscription. The terms ride on the wire so a client never hard-codes the amounts.  `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2232,7 +2233,7 @@ class BillingApi:
     ) -> Subscription:
         """Get the org subscription status and quota usage
 
-        Returns the organization's flat-tier subscription: whether it is entitled, the current billing period, the plan's configured quota, and — for an entitled subscription — consumption against the four limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
+        Returns the organization's subscription: whether it is entitled, the current billing period, the plan it is on and that plan's configured quota, and — for an entitled subscription — consumption against the limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  `plan` and `quota` describe the plan the organization IS on (the Base plan for an organization that never subscribed). `plans` lists every plan this deployment offers — Base, then Plus — each with its price and quota, so a client can render an upgrade offer without a second call.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the Base plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2297,7 +2298,7 @@ class BillingApi:
     ) -> ApiResponse[Subscription]:
         """Get the org subscription status and quota usage
 
-        Returns the organization's flat-tier subscription: whether it is entitled, the current billing period, the plan's configured quota, and — for an entitled subscription — consumption against the four limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
+        Returns the organization's subscription: whether it is entitled, the current billing period, the plan it is on and that plan's configured quota, and — for an entitled subscription — consumption against the limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  `plan` and `quota` describe the plan the organization IS on (the Base plan for an organization that never subscribed). `plans` lists every plan this deployment offers — Base, then Plus — each with its price and quota, so a client can render an upgrade offer without a second call.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the Base plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2362,7 +2363,7 @@ class BillingApi:
     ) -> RESTResponseType:
         """Get the org subscription status and quota usage
 
-        Returns the organization's flat-tier subscription: whether it is entitled, the current billing period, the plan's configured quota, and — for an entitled subscription — consumption against the four limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
+        Returns the organization's subscription: whether it is entitled, the current billing period, the plan it is on and that plan's configured quota, and — for an entitled subscription — consumption against the limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.  `plan` and `quota` describe the plan the organization IS on (the Base plan for an organization that never subscribed). `plans` lists every plan this deployment offers — Base, then Plus — each with its price and quota, so a client can render an upgrade offer without a second call.  An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: \"none\"` and the quota the Base plan would provide, so a client can answer \"what does the plan include\" without a second endpoint and without an error path.  Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.  `usage` is present only for an entitled subscription whose meter could be read. An absent `usage` NEVER means \"nothing used\" — reading it as zero would report a full quota to an organization that has none left.  This is the plan's meter. For pay-as-you-go credit see `/billing/balance`, for spend against a self-set cap see `/billing/spending-limit`, and for past consumption see `/usage`. 
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2995,6 +2996,305 @@ class BillingApi:
         return self.api_client.param_serialize(
             method='PUT',
             resource_path='/billing/spending-limit',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def upgrade_subscription(
+        self,
+        subscription_upgrade_request: SubscriptionUpgradeRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Subscription:
+        """Upgrade the subscription to a bigger plan
+
+        Moves the organization's EXISTING subscription onto a bigger plan. Requires the `billing:write` scope AND organization-admin privileges — an upgrade charges the organization's card on file.  Unlike checkout, no hosted page is involved: the subscription's price is swapped, the new plan's FULL price is charged immediately (whenever in the cycle the upgrade happens), and a new billing period starts now. There is no credit for the unused remainder of the old plan's period, and the usage meters start from zero on the new plan because every quota window is summed over the current period. The response is the post-upgrade subscription, in the same shape as `/billing/subscription`.  `plan_key` is required and names the target plan (`plus`). The target must be bigger than the plan the organization is on: upgrading to the current plan or to a smaller one is a 409 `not_an_upgrade` — downgrades go through the billing portal. An organization with no entitling subscription gets 409 `not_subscribed` and should use checkout instead. A subscription already set to end at the period close is refused with 409 `subscription_cancelling` (the upgrade would start a new period and move that end date); resume it in the portal first.  If the charge cannot be collected (card declined, no payment method) the call is a 402 `payment_failed` and NOTHING changes — the organization stays on its current plan. Fix the card in the billing portal and retry. 
+
+        :param subscription_upgrade_request: (required)
+        :type subscription_upgrade_request: SubscriptionUpgradeRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upgrade_subscription_serialize(
+            subscription_upgrade_request=subscription_upgrade_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def upgrade_subscription_with_http_info(
+        self,
+        subscription_upgrade_request: SubscriptionUpgradeRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Subscription]:
+        """Upgrade the subscription to a bigger plan
+
+        Moves the organization's EXISTING subscription onto a bigger plan. Requires the `billing:write` scope AND organization-admin privileges — an upgrade charges the organization's card on file.  Unlike checkout, no hosted page is involved: the subscription's price is swapped, the new plan's FULL price is charged immediately (whenever in the cycle the upgrade happens), and a new billing period starts now. There is no credit for the unused remainder of the old plan's period, and the usage meters start from zero on the new plan because every quota window is summed over the current period. The response is the post-upgrade subscription, in the same shape as `/billing/subscription`.  `plan_key` is required and names the target plan (`plus`). The target must be bigger than the plan the organization is on: upgrading to the current plan or to a smaller one is a 409 `not_an_upgrade` — downgrades go through the billing portal. An organization with no entitling subscription gets 409 `not_subscribed` and should use checkout instead. A subscription already set to end at the period close is refused with 409 `subscription_cancelling` (the upgrade would start a new period and move that end date); resume it in the portal first.  If the charge cannot be collected (card declined, no payment method) the call is a 402 `payment_failed` and NOTHING changes — the organization stays on its current plan. Fix the card in the billing portal and retry. 
+
+        :param subscription_upgrade_request: (required)
+        :type subscription_upgrade_request: SubscriptionUpgradeRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upgrade_subscription_serialize(
+            subscription_upgrade_request=subscription_upgrade_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def upgrade_subscription_without_preload_content(
+        self,
+        subscription_upgrade_request: SubscriptionUpgradeRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Upgrade the subscription to a bigger plan
+
+        Moves the organization's EXISTING subscription onto a bigger plan. Requires the `billing:write` scope AND organization-admin privileges — an upgrade charges the organization's card on file.  Unlike checkout, no hosted page is involved: the subscription's price is swapped, the new plan's FULL price is charged immediately (whenever in the cycle the upgrade happens), and a new billing period starts now. There is no credit for the unused remainder of the old plan's period, and the usage meters start from zero on the new plan because every quota window is summed over the current period. The response is the post-upgrade subscription, in the same shape as `/billing/subscription`.  `plan_key` is required and names the target plan (`plus`). The target must be bigger than the plan the organization is on: upgrading to the current plan or to a smaller one is a 409 `not_an_upgrade` — downgrades go through the billing portal. An organization with no entitling subscription gets 409 `not_subscribed` and should use checkout instead. A subscription already set to end at the period close is refused with 409 `subscription_cancelling` (the upgrade would start a new period and move that end date); resume it in the portal first.  If the charge cannot be collected (card declined, no payment method) the call is a 402 `payment_failed` and NOTHING changes — the organization stays on its current plan. Fix the card in the billing portal and retry. 
+
+        :param subscription_upgrade_request: (required)
+        :type subscription_upgrade_request: SubscriptionUpgradeRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upgrade_subscription_serialize(
+            subscription_upgrade_request=subscription_upgrade_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _upgrade_subscription_serialize(
+        self,
+        subscription_upgrade_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if subscription_upgrade_request is not None:
+            _body_params = subscription_upgrade_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json', 
+                    'application/problem+json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/billing/subscription/upgrade',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

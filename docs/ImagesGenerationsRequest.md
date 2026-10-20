@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**model** | **str** | Customer-facing image model id (e.g. deeprelay/flux.1-schnell) or alias. | 
+**model** | **str** | Customer-facing image model id (e.g. deeprelay/seedream-4.0) or alias. | 
 **prompt** | **str** | Text description of the image(s) to generate. | 
 **n** | **int** | Number of images to generate. Defaults to 1. | [optional] [default to 1]
 **size** | **str** | Output image dimensions as WxH (e.g. 1024x1024). | [optional] 

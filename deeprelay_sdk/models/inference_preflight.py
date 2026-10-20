@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -30,7 +30,7 @@ class InferencePreflight(BaseModel):
     """ # noqa: E501
     model: StrictStr = Field(description="The canonical catalog id the request resolved to.")
     verdict: StrictStr = Field(description="`ok` — the request will be served (covered by the plan, or payable). `warn` — it will be served AND charged in a way the caller may not expect. `block` — it will be refused (402 or 429).")
-    reason: Optional[StrictStr] = Field(default=None, description="Stable code explaining the verdict, for clients that need their own wording. Absent on a plain `ok` that needs no explanation.")
+    reason: Optional[StrictStr] = Field(default=None, description="Stable code explaining the verdict, for clients that need their own wording. Absent on a plain `ok` that needs no explanation. `api_key_budget_exceeded`, `member_spend_limit_reached` and `model_not_allowed_for_key` come with `verdict: block` and only for a key that has a budget or a model allowlist, or a member that has a spend limit.")
     message: StrictStr = Field(description="A ready-to-print sentence, phrased for this exact plan/credit combination. Prefer it over composing one from verdict and reason: it improves without a client release.")
     plan_covered: StrictBool = Field(description="Whether the subscription tier covers this model. A property of the PLATFORM, not of the caller — it stays true for an organization that has no subscription, which is what makes the \"this is included in the plan\" upsell honest.")
     subscribed: StrictBool = Field(description="Whether the organization is entitled to the plan right now.")
@@ -50,8 +50,8 @@ class InferencePreflight(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['plan_covered', 'payg', 'not_plan_covered', 'subscription_quota_exhausted', 'insufficient_balance', 'daily_limit_reached', 'monthly_limit_reached', 'preflight_unavailable']):
-            raise ValueError("must be one of enum values ('plan_covered', 'payg', 'not_plan_covered', 'subscription_quota_exhausted', 'insufficient_balance', 'daily_limit_reached', 'monthly_limit_reached', 'preflight_unavailable')")
+        if value not in set(['plan_covered', 'payg', 'not_plan_covered', 'subscription_quota_exhausted', 'insufficient_balance', 'daily_limit_reached', 'monthly_limit_reached', 'api_key_budget_exceeded', 'member_spend_limit_reached', 'model_not_allowed_for_key', 'preflight_unavailable']):
+            raise ValueError("must be one of enum values ('plan_covered', 'payg', 'not_plan_covered', 'subscription_quota_exhausted', 'insufficient_balance', 'daily_limit_reached', 'monthly_limit_reached', 'api_key_budget_exceeded', 'member_spend_limit_reached', 'model_not_allowed_for_key', 'preflight_unavailable')")
         return value
 
     model_config = ConfigDict(

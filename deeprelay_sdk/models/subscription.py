@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -23,6 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota
+from deeprelay_sdk.models.subscription_tier import SubscriptionTier
 from deeprelay_sdk.models.subscription_usage import SubscriptionUsage
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,7 +31,7 @@ from pydantic_core import to_jsonable_python
 
 class Subscription(BaseModel):
     """
-    The organization's flat subscription tier: entitlement, billing period, the configured quota, and consumption against it. The console and this endpoint assemble it from the same source, so the two surfaces cannot report different numbers. 
+    The organization's subscription: entitlement, billing period, the plan it is on with that plan's configured quota, consumption against it, and the plans this deployment offers. The console and this endpoint assemble it from the same source, so the two surfaces cannot report different numbers. 
     """ # noqa: E501
     subscribed: StrictBool = Field(description="Whether the organization is entitled to the plan right now. Only an `active` or `trialing` subscription entitles, including a short grace window past the period end that absorbs renewal webhook lag; a failed payment (`past_due`) cuts access immediately. Render from this; do not re-derive entitlement from `status` and the period bounds.")
     status: StrictStr = Field(description="Raw subscription status — \"active\", \"trialing\", \"past_due\", \"canceled\" and so on — or \"none\" when the organization never subscribed.")
@@ -40,7 +41,8 @@ class Subscription(BaseModel):
     plan: SubscriptionPlan
     quota: SubscriptionQuota
     usage: Optional[SubscriptionUsage] = None
-    __properties: ClassVar[List[str]] = ["subscribed", "status", "cancel_at_period_end", "current_period_start", "current_period_end", "plan", "quota", "usage"]
+    plans: List[SubscriptionTier] = Field(description="Every plan this deployment offers, smallest first (Base, then Plus when it is configured), each with its price and quota. The keys are the accepted `plan_key` values for checkout and upgrade. Empty when nothing can be bought here.")
+    __properties: ClassVar[List[str]] = ["subscribed", "status", "cancel_at_period_end", "current_period_start", "current_period_end", "plan", "quota", "usage", "plans"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -90,6 +92,13 @@ class Subscription(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of usage
         if self.usage:
             _dict['usage'] = self.usage.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in plans (list)
+        _items = []
+        if self.plans:
+            for _item_plans in self.plans:
+                if _item_plans:
+                    _items.append(_item_plans.to_dict())
+            _dict['plans'] = _items
         return _dict
 
     @classmethod
@@ -109,7 +118,8 @@ class Subscription(BaseModel):
             "current_period_end": obj.get("current_period_end"),
             "plan": SubscriptionPlan.from_dict(obj["plan"]) if obj.get("plan") is not None else None,
             "quota": SubscriptionQuota.from_dict(obj["quota"]) if obj.get("quota") is not None else None,
-            "usage": SubscriptionUsage.from_dict(obj["usage"]) if obj.get("usage") is not None else None
+            "usage": SubscriptionUsage.from_dict(obj["usage"]) if obj.get("usage") is not None else None,
+            "plans": [SubscriptionTier.from_dict(_item) for _item in obj["plans"]] if obj.get("plans") is not None else None
         })
         return _obj
 

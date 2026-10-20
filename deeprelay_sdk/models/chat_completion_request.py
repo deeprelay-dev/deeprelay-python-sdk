@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -21,8 +21,11 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
+from deeprelay_sdk.models.chat_completion_request_response_format import ChatCompletionRequestResponseFormat
+from deeprelay_sdk.models.chat_completion_request_tool_choice import ChatCompletionRequestToolChoice
 from deeprelay_sdk.models.chat_message import ChatMessage
 from deeprelay_sdk.models.stream_options import StreamOptions
+from deeprelay_sdk.models.tool import Tool
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -31,13 +34,24 @@ class ChatCompletionRequest(BaseModel):
     """
     ChatCompletionRequest
     """ # noqa: E501
-    model: StrictStr = Field(description="Canonical model id, e.g. \"deeprelay/qwen2.5-7b-instruct\".")
+    model: StrictStr = Field(description="Canonical model id, e.g. \"deeprelay/llama-3.3-70b-instruct\".")
     messages: List[ChatMessage]
     temperature: Optional[Union[StrictFloat, StrictInt]] = None
     max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    max_completion_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="OpenAI's newer name for max_tokens, accepted for client compatibility. When both are sent, max_tokens wins. ")
     stream: Optional[StrictBool] = False
     stream_options: Optional[StreamOptions] = None
-    __properties: ClassVar[List[str]] = ["model", "messages", "temperature", "max_tokens", "stream", "stream_options"]
+    tools: Optional[List[Tool]] = Field(default=None, description="Functions the model may call. Support is per-model — check for \"tools\" in the model's supported_parameters before sending it. Omit the field entirely rather than sending an empty array. ")
+    tool_choice: Optional[ChatCompletionRequestToolChoice] = None
+    response_format: Optional[ChatCompletionRequestResponseFormat] = None
+    reasoning_effort: Optional[StrictStr] = Field(default=None, description="Hint: how much a reasoning model should think. Values in use are none, minimal, low, medium, high and xhigh; which ones a model accepts varies. Forwarded to an upstream that accepts the value, otherwise dropped and reported in x-deeprelay-ignored-params. Never rejected. ")
+    presence_penalty: Optional[Union[Annotated[float, Field(le=2, strict=True, ge=-2)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = Field(default=None, description="Hint. Forwarded when the serving upstream accepts it, otherwise dropped and reported in x-deeprelay-ignored-params.")
+    frequency_penalty: Optional[Union[Annotated[float, Field(le=2, strict=True, ge=-2)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = Field(default=None, description="Hint. Forwarded when the serving upstream accepts it, otherwise dropped and reported in x-deeprelay-ignored-params.")
+    seed: Optional[StrictInt] = Field(default=None, description="Hint for best-effort determinism. Forwarded when the serving upstream accepts it, otherwise dropped and reported. Identical seeds are not guaranteed to give identical output across upstreams. ")
+    parallel_tool_calls: Optional[StrictBool] = Field(default=None, description="Whether the model may emit several tool calls in one turn. When false and the serving upstream cannot honour it, the relay returns only the first tool call and reports `parallel_tool_calls:enforced` in x-deeprelay-ignored-params. ")
+    logprobs: Optional[StrictBool] = Field(default=None, description="Return per-token log probabilities in choices[].logprobs. Gated per model (\"logprobs\" in supported_parameters). Values come from the serving upstream and are not comparable across upstreams or numeric precisions. ")
+    top_logprobs: Optional[Annotated[int, Field(le=20, strict=True, ge=0)]] = Field(default=None, description="Number of alternatives per token (requires logprobs). Gated per model; each model has its own maximum, and a larger value returns 400 unsupported_parameter. ")
+    __properties: ClassVar[List[str]] = ["model", "messages", "temperature", "max_tokens", "max_completion_tokens", "stream", "stream_options", "tools", "tool_choice", "response_format", "reasoning_effort", "presence_penalty", "frequency_penalty", "seed", "parallel_tool_calls", "logprobs", "top_logprobs"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -88,6 +102,19 @@ class ChatCompletionRequest(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of stream_options
         if self.stream_options:
             _dict['stream_options'] = self.stream_options.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in tools (list)
+        _items = []
+        if self.tools:
+            for _item_tools in self.tools:
+                if _item_tools:
+                    _items.append(_item_tools.to_dict())
+            _dict['tools'] = _items
+        # override the default output from pydantic by calling `to_dict()` of tool_choice
+        if self.tool_choice:
+            _dict['tool_choice'] = self.tool_choice.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of response_format
+        if self.response_format:
+            _dict['response_format'] = self.response_format.to_dict()
         return _dict
 
     @classmethod
@@ -104,8 +131,19 @@ class ChatCompletionRequest(BaseModel):
             "messages": [ChatMessage.from_dict(_item) for _item in obj["messages"]] if obj.get("messages") is not None else None,
             "temperature": obj.get("temperature"),
             "max_tokens": obj.get("max_tokens"),
+            "max_completion_tokens": obj.get("max_completion_tokens"),
             "stream": obj.get("stream") if obj.get("stream") is not None else False,
-            "stream_options": StreamOptions.from_dict(obj["stream_options"]) if obj.get("stream_options") is not None else None
+            "stream_options": StreamOptions.from_dict(obj["stream_options"]) if obj.get("stream_options") is not None else None,
+            "tools": [Tool.from_dict(_item) for _item in obj["tools"]] if obj.get("tools") is not None else None,
+            "tool_choice": ChatCompletionRequestToolChoice.from_dict(obj["tool_choice"]) if obj.get("tool_choice") is not None else None,
+            "response_format": ChatCompletionRequestResponseFormat.from_dict(obj["response_format"]) if obj.get("response_format") is not None else None,
+            "reasoning_effort": obj.get("reasoning_effort"),
+            "presence_penalty": obj.get("presence_penalty"),
+            "frequency_penalty": obj.get("frequency_penalty"),
+            "seed": obj.get("seed"),
+            "parallel_tool_calls": obj.get("parallel_tool_calls"),
+            "logprobs": obj.get("logprobs"),
+            "top_logprobs": obj.get("top_logprobs")
         })
         return _obj
 

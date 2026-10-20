@@ -5,7 +5,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -15,13 +15,16 @@
 """  # noqa: E501
 
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 # Define package exports
 __all__ = [
+    "AlertsApi",
+    "ApiKeysApi",
     "BillingApi",
     "InferenceApi",
     "MetaApi",
+    "RequestsApi",
     "UsageApi",
     "WebhooksApi",
     "ApiResponse",
@@ -33,11 +36,23 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
+    "AlertEmailToggles",
+    "AlertSettings",
+    "AlertSettingsUpdate",
+    "ApiKey",
+    "ApiKeyCreate",
+    "ApiKeyCreated",
+    "ApiKeyList",
+    "ApiKeyScopes",
+    "ApiKeyUpdate",
     "Balance",
     "ChatChoice",
     "ChatCompletionRequest",
+    "ChatCompletionRequestResponseFormat",
+    "ChatCompletionRequestToolChoice",
     "ChatCompletionResponse",
     "ChatMessage",
+    "CostDetails",
     "CreateCryptoDepositRequest",
     "CreateWebhookEndpointRequest",
     "CryptoDeposit",
@@ -52,9 +67,11 @@ __all__ = [
     "ImagesResponseDataInner",
     "ImagesResponseUsage",
     "InferencePreflight",
+    "JSONSchemaFormat",
     "ListDeposits200Response",
     "Model",
     "ModelList",
+    "ModelMetrics",
     "ModelParametersInner",
     "ModelPricing",
     "ModelRate",
@@ -64,21 +81,37 @@ __all__ = [
     "Problem",
     "RefereeStatus",
     "Referral",
+    "RequestLogEntry",
+    "RequestLogPage",
+    "ResponseFormatJSONObject",
+    "ResponseFormatJSONSchema",
+    "ResponseFormatText",
     "SpendingLimit",
     "StreamOptions",
     "Subscription",
     "SubscriptionCheckoutRequest",
     "SubscriptionCheckoutSession",
+    "SubscriptionModelUsage",
     "SubscriptionPlan",
     "SubscriptionPortalRequest",
     "SubscriptionPortalSession",
     "SubscriptionPrice",
     "SubscriptionQuota",
+    "SubscriptionTier",
+    "SubscriptionUpgradeRequest",
     "SubscriptionUsage",
+    "Tool",
+    "ToolCall",
+    "ToolCallFunction",
+    "ToolChoiceFunction",
+    "ToolChoiceFunctionFunction",
+    "ToolFunction",
     "UpdateSpendingLimitRequest",
     "Usage",
     "UsageBucket",
+    "UsageCompletionTokensDetails",
     "UsagePage",
+    "UsagePromptTokensDetails",
     "VideoCreateRequest",
     "VideoJob",
     "VideoList",
@@ -87,9 +120,12 @@ __all__ = [
 ]
 
 # import apis into sdk package
+from deeprelay_sdk.api.alerts_api import AlertsApi as AlertsApi
+from deeprelay_sdk.api.api_keys_api import ApiKeysApi as ApiKeysApi
 from deeprelay_sdk.api.billing_api import BillingApi as BillingApi
 from deeprelay_sdk.api.inference_api import InferenceApi as InferenceApi
 from deeprelay_sdk.api.meta_api import MetaApi as MetaApi
+from deeprelay_sdk.api.requests_api import RequestsApi as RequestsApi
 from deeprelay_sdk.api.usage_api import UsageApi as UsageApi
 from deeprelay_sdk.api.webhooks_api import WebhooksApi as WebhooksApi
 
@@ -105,11 +141,23 @@ from deeprelay_sdk.exceptions import ApiAttributeError as ApiAttributeError
 from deeprelay_sdk.exceptions import ApiException as ApiException
 
 # import models into sdk package
+from deeprelay_sdk.models.alert_email_toggles import AlertEmailToggles as AlertEmailToggles
+from deeprelay_sdk.models.alert_settings import AlertSettings as AlertSettings
+from deeprelay_sdk.models.alert_settings_update import AlertSettingsUpdate as AlertSettingsUpdate
+from deeprelay_sdk.models.api_key import ApiKey as ApiKey
+from deeprelay_sdk.models.api_key_create import ApiKeyCreate as ApiKeyCreate
+from deeprelay_sdk.models.api_key_created import ApiKeyCreated as ApiKeyCreated
+from deeprelay_sdk.models.api_key_list import ApiKeyList as ApiKeyList
+from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes as ApiKeyScopes
+from deeprelay_sdk.models.api_key_update import ApiKeyUpdate as ApiKeyUpdate
 from deeprelay_sdk.models.balance import Balance as Balance
 from deeprelay_sdk.models.chat_choice import ChatChoice as ChatChoice
 from deeprelay_sdk.models.chat_completion_request import ChatCompletionRequest as ChatCompletionRequest
+from deeprelay_sdk.models.chat_completion_request_response_format import ChatCompletionRequestResponseFormat as ChatCompletionRequestResponseFormat
+from deeprelay_sdk.models.chat_completion_request_tool_choice import ChatCompletionRequestToolChoice as ChatCompletionRequestToolChoice
 from deeprelay_sdk.models.chat_completion_response import ChatCompletionResponse as ChatCompletionResponse
 from deeprelay_sdk.models.chat_message import ChatMessage as ChatMessage
+from deeprelay_sdk.models.cost_details import CostDetails as CostDetails
 from deeprelay_sdk.models.create_crypto_deposit_request import CreateCryptoDepositRequest as CreateCryptoDepositRequest
 from deeprelay_sdk.models.create_webhook_endpoint_request import CreateWebhookEndpointRequest as CreateWebhookEndpointRequest
 from deeprelay_sdk.models.crypto_deposit import CryptoDeposit as CryptoDeposit
@@ -124,9 +172,11 @@ from deeprelay_sdk.models.images_response import ImagesResponse as ImagesRespons
 from deeprelay_sdk.models.images_response_data_inner import ImagesResponseDataInner as ImagesResponseDataInner
 from deeprelay_sdk.models.images_response_usage import ImagesResponseUsage as ImagesResponseUsage
 from deeprelay_sdk.models.inference_preflight import InferencePreflight as InferencePreflight
+from deeprelay_sdk.models.json_schema_format import JSONSchemaFormat as JSONSchemaFormat
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response as ListDeposits200Response
 from deeprelay_sdk.models.model import Model as Model
 from deeprelay_sdk.models.model_list import ModelList as ModelList
+from deeprelay_sdk.models.model_metrics import ModelMetrics as ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner as ModelParametersInner
 from deeprelay_sdk.models.model_pricing import ModelPricing as ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate as ModelRate
@@ -136,21 +186,37 @@ from deeprelay_sdk.models.peak_window import PeakWindow as PeakWindow
 from deeprelay_sdk.models.problem import Problem as Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus as RefereeStatus
 from deeprelay_sdk.models.referral import Referral as Referral
+from deeprelay_sdk.models.request_log_entry import RequestLogEntry as RequestLogEntry
+from deeprelay_sdk.models.request_log_page import RequestLogPage as RequestLogPage
+from deeprelay_sdk.models.response_format_json_object import ResponseFormatJSONObject as ResponseFormatJSONObject
+from deeprelay_sdk.models.response_format_json_schema import ResponseFormatJSONSchema as ResponseFormatJSONSchema
+from deeprelay_sdk.models.response_format_text import ResponseFormatText as ResponseFormatText
 from deeprelay_sdk.models.spending_limit import SpendingLimit as SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions as StreamOptions
 from deeprelay_sdk.models.subscription import Subscription as Subscription
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest as SubscriptionCheckoutRequest
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession as SubscriptionCheckoutSession
+from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage as SubscriptionModelUsage
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan as SubscriptionPlan
 from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest as SubscriptionPortalRequest
 from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession as SubscriptionPortalSession
 from deeprelay_sdk.models.subscription_price import SubscriptionPrice as SubscriptionPrice
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota as SubscriptionQuota
+from deeprelay_sdk.models.subscription_tier import SubscriptionTier as SubscriptionTier
+from deeprelay_sdk.models.subscription_upgrade_request import SubscriptionUpgradeRequest as SubscriptionUpgradeRequest
 from deeprelay_sdk.models.subscription_usage import SubscriptionUsage as SubscriptionUsage
+from deeprelay_sdk.models.tool import Tool as Tool
+from deeprelay_sdk.models.tool_call import ToolCall as ToolCall
+from deeprelay_sdk.models.tool_call_function import ToolCallFunction as ToolCallFunction
+from deeprelay_sdk.models.tool_choice_function import ToolChoiceFunction as ToolChoiceFunction
+from deeprelay_sdk.models.tool_choice_function_function import ToolChoiceFunctionFunction as ToolChoiceFunctionFunction
+from deeprelay_sdk.models.tool_function import ToolFunction as ToolFunction
 from deeprelay_sdk.models.update_spending_limit_request import UpdateSpendingLimitRequest as UpdateSpendingLimitRequest
 from deeprelay_sdk.models.usage import Usage as Usage
 from deeprelay_sdk.models.usage_bucket import UsageBucket as UsageBucket
+from deeprelay_sdk.models.usage_completion_tokens_details import UsageCompletionTokensDetails as UsageCompletionTokensDetails
 from deeprelay_sdk.models.usage_page import UsagePage as UsagePage
+from deeprelay_sdk.models.usage_prompt_tokens_details import UsagePromptTokensDetails as UsagePromptTokensDetails
 from deeprelay_sdk.models.video_create_request import VideoCreateRequest as VideoCreateRequest
 from deeprelay_sdk.models.video_job import VideoJob as VideoJob
 from deeprelay_sdk.models.video_list import VideoList as VideoList

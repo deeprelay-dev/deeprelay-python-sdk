@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -34,13 +34,15 @@ class Problem(BaseModel):
     detail: StrictStr
     code: StrictStr
     request_id: StrictStr
-    __properties: ClassVar[List[str]] = ["type", "title", "status", "detail", "code", "request_id"]
+    var_field: Optional[StrictStr] = Field(default=None, description="On a 422 `validation_failed`, the request field that failed.", alias="field")
+    max_rows: Optional[StrictInt] = Field(default=None, description="On a 422 `export_too_large`, the export row cap.")
+    __properties: ClassVar[List[str]] = ["type", "title", "status", "detail", "code", "request_id", "field", "max_rows"]
 
     @field_validator('code')
     def code_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['unauthenticated', 'invalid_api_key', 'insufficient_scope', 'not_found', 'idempotency_conflict', 'idempotency_mismatch', 'validation_failed', 'invalid_gpu_type', 'disk_unavailable', 'disk_exceeds_offering', 'model_too_large', 'gpu_vram_too_small', 'price_changed', 'insufficient_balance', 'quota_exceeded', 'rate_limited', 'creator_check_unavailable', 'internal_error', 'operation_failed']):
-            raise ValueError("must be one of enum values ('unauthenticated', 'invalid_api_key', 'insufficient_scope', 'not_found', 'idempotency_conflict', 'idempotency_mismatch', 'validation_failed', 'invalid_gpu_type', 'disk_unavailable', 'disk_exceeds_offering', 'model_too_large', 'gpu_vram_too_small', 'price_changed', 'insufficient_balance', 'quota_exceeded', 'rate_limited', 'creator_check_unavailable', 'internal_error', 'operation_failed')")
+        if value not in set(['unauthenticated', 'invalid_api_key', 'insufficient_scope', 'not_found', 'idempotency_conflict', 'idempotency_mismatch', 'validation_failed', 'invalid_gpu_type', 'disk_unavailable', 'disk_exceeds_offering', 'model_too_large', 'gpu_vram_too_small', 'price_changed', 'insufficient_balance', 'quota_exceeded', 'rate_limited', 'forbidden', 'invalid_request', 'keys_manage_required', 'scope_exceeds_caller', 'export_too_large', 'api_key_budget_exceeded', 'member_spend_limit_reached', 'model_not_allowed_for_key', 'creator_check_unavailable', 'switch_renewal_unpaid', 'internal_error', 'operation_failed']):
+            raise ValueError("must be one of enum values ('unauthenticated', 'invalid_api_key', 'insufficient_scope', 'not_found', 'idempotency_conflict', 'idempotency_mismatch', 'validation_failed', 'invalid_gpu_type', 'disk_unavailable', 'disk_exceeds_offering', 'model_too_large', 'gpu_vram_too_small', 'price_changed', 'insufficient_balance', 'quota_exceeded', 'rate_limited', 'forbidden', 'invalid_request', 'keys_manage_required', 'scope_exceeds_caller', 'export_too_large', 'api_key_budget_exceeded', 'member_spend_limit_reached', 'model_not_allowed_for_key', 'creator_check_unavailable', 'switch_renewal_unpaid', 'internal_error', 'operation_failed')")
         return value
 
     model_config = ConfigDict(
@@ -99,7 +101,9 @@ class Problem(BaseModel):
             "status": obj.get("status"),
             "detail": obj.get("detail"),
             "code": obj.get("code"),
-            "request_id": obj.get("request_id")
+            "request_id": obj.get("request_id"),
+            "field": obj.get("field"),
+            "max_rows": obj.get("max_rows")
         })
         return _obj
 

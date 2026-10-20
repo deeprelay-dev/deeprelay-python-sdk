@@ -6,7 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **amount_cents** | **int** | Amount to deposit in USD cents. Must be at least the configured minimum (500 &#x3D; $5.00 by default).  | 
-**chain** | **str** |  | 
+**chain** | **str** | Network to send on. tron and bsc (BNB Chain) carry USDT only (TRC-20 and BEP-20); base carries USDC only.  | 
 **asset** | **str** |  | 
 
 ## Example

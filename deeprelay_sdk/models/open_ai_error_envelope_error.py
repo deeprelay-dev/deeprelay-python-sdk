@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,6 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
@@ -30,9 +31,10 @@ class OpenAIErrorEnvelopeError(BaseModel):
     """ # noqa: E501
     message: StrictStr
     type: StrictStr = Field(description="OpenAI error class (e.g. invalid_request_error, authentication_error, billing_error).")
-    param: Optional[StrictStr] = None
+    param: Optional[StrictStr] = Field(default=None, description="On a 429 subscription_quota_exhausted this is the tripped gate: monthly_input_tokens, monthly_output_tokens, weekly_input_tokens, weekly_output_tokens, max_usage, input_overshoot (this request's estimated input alone exceeds what is left in the tighter of the monthly and rolling 7-day input allowances), or output_overshoot (the same for the estimated output — the completion bound, max_tokens or the model's declared maximum). On an overshoot the quota is not exhausted — send a smaller request (or a smaller max_tokens) or add credits.")
     code: StrictStr = Field(description="Stable machine-readable error code.")
-    __properties: ClassVar[List[str]] = ["message", "type", "param", "code"]
+    quota_frees_at: Optional[datetime] = Field(default=None, description="Only on a 429 `subscription_quota_exhausted` whose `param` is `weekly_input_tokens` or `weekly_output_tokens` (the rolling 7-day caps): the RFC 3339 time at which enough plan-covered usage ages out of the rolling window for requests to ride the plan again — the earlier of the two windows' free times, each computed from its own dimension. The message names the same time. Omitted on every other error, and omitted when it cannot be computed. There is no Retry-After on this 429 and `x-should-retry` is `false`: wait until this time or add credits, rather than auto-retrying.")
+    __properties: ClassVar[List[str]] = ["message", "type", "param", "code", "quota_frees_at"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -88,7 +90,8 @@ class OpenAIErrorEnvelopeError(BaseModel):
             "message": obj.get("message"),
             "type": obj.get("type"),
             "param": obj.get("param"),
-            "code": obj.get("code")
+            "code": obj.get("code"),
+            "quota_frees_at": obj.get("quota_frees_at")
         })
         return _obj
 

@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -29,18 +29,20 @@ class Referral(BaseModel):
     """
     The organization's referral-program view: its invite link, the program terms, its referrer stats, and (only when it was itself referred) its referee progress. Amounts are USD cents. 
     """ # noqa: E501
-    code: StrictStr = Field(description="The organization's shareable referral code, e.g. `GPU-7KQ2-M4XP`.", json_schema_extra={"examples": ["GPU-7KQ2-M4XP"]})
-    invite_url: StrictStr = Field(description="The ready-to-share invite link, `{site}/r/{code}`.", json_schema_extra={"examples": ["https://deeprelay.ai/r/GPU-7KQ2-M4XP"]})
+    code: StrictStr = Field(description="The organization's shareable referral code, e.g. `DR-7KQ2-M4XP`.", json_schema_extra={"examples": ["DR-7KQ2-M4XP"]})
+    invite_url: StrictStr = Field(description="The ready-to-share invite link, `{site}/r/{code}`.", json_schema_extra={"examples": ["https://deeprelay.ai/r/DR-7KQ2-M4XP"]})
     pending: StrictInt = Field(description="Friends who signed up through the link but have not yet reached the spend gate.")
     qualified: StrictInt = Field(description="Friends past the spend gate whose reward is inside the chargeback hold.")
     settled: StrictInt = Field(description="Referrals that have paid out.")
     earned_cents: StrictInt = Field(description="Total credit paid to this organization as a referrer.")
+    commission_earned_cents: StrictInt = Field(description="Total deposit commission credited to this organization as a referrer (separate from the flat bonus in `earned_cents`).")
     reward_cents: StrictInt = Field(description="Credit paid to the referrer per settled referral.")
     referee_reward_cents: StrictInt = Field(description="Credit paid to the referred friend per settled referral.")
     qualify_spend_cents: StrictInt = Field(description="The friend's cumulative inference spend that qualifies a referral.")
     hold_days: StrictInt = Field(description="Days between qualification and payout (chargeback hold).")
+    commission_pct: StrictInt = Field(description="Percentage of each real deposit a referred friend makes that is credited to the referrer as spend-only promotional credit. 0 means the commission is off.")
     referred: Optional[RefereeStatus] = None
-    __properties: ClassVar[List[str]] = ["code", "invite_url", "pending", "qualified", "settled", "earned_cents", "reward_cents", "referee_reward_cents", "qualify_spend_cents", "hold_days", "referred"]
+    __properties: ClassVar[List[str]] = ["code", "invite_url", "pending", "qualified", "settled", "earned_cents", "commission_earned_cents", "reward_cents", "referee_reward_cents", "qualify_spend_cents", "hold_days", "commission_pct", "referred"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -102,10 +104,12 @@ class Referral(BaseModel):
             "qualified": obj.get("qualified"),
             "settled": obj.get("settled"),
             "earned_cents": obj.get("earned_cents"),
+            "commission_earned_cents": obj.get("commission_earned_cents"),
             "reward_cents": obj.get("reward_cents"),
             "referee_reward_cents": obj.get("referee_reward_cents"),
             "qualify_spend_cents": obj.get("qualify_spend_cents"),
             "hold_days": obj.get("hold_days"),
+            "commission_pct": obj.get("commission_pct"),
             "referred": RefereeStatus.from_dict(obj["referred"]) if obj.get("referred") is not None else None
         })
         return _obj

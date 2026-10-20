@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -29,15 +29,15 @@ class CreateCryptoDepositRequest(BaseModel):
     CreateCryptoDepositRequest
     """ # noqa: E501
     amount_cents: StrictInt = Field(description="Amount to deposit in USD cents. Must be at least the configured minimum (500 = $5.00 by default). ")
-    chain: StrictStr
+    chain: StrictStr = Field(description="Network to send on. tron and bsc (BNB Chain) carry USDT only (TRC-20 and BEP-20); base carries USDC only. ")
     asset: StrictStr
     __properties: ClassVar[List[str]] = ["amount_cents", "chain", "asset"]
 
     @field_validator('chain')
     def chain_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['ethereum', 'base', 'arbitrum', 'polygon', 'solana']):
-            raise ValueError("must be one of enum values ('ethereum', 'base', 'arbitrum', 'polygon', 'solana')")
+        if value not in set(['ethereum', 'base', 'arbitrum', 'polygon', 'solana', 'tron', 'bsc']):
+            raise ValueError("must be one of enum values ('ethereum', 'base', 'arbitrum', 'polygon', 'solana', 'tron', 'bsc')")
         return value
 
     @field_validator('asset')

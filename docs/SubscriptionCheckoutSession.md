@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 **checkout_url** | **str** | The hosted page the customer must open to pay. | 
 **session_id** | **str** | Checkout session id, for support correlation. | 
 **plan** | [**SubscriptionPlan**](SubscriptionPlan.md) |  | 
+**switch_to** | **str** | Set when the checkout switches an existing plan&#39;s billing currency. | [optional] 
+**first_charge_at** | **datetime** | For a switch, when the new currency is first charged (the current renewal date). | [optional] 
 
 ## Example
 

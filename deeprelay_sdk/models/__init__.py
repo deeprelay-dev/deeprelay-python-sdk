@@ -4,7 +4,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -14,11 +14,23 @@
 """  # noqa: E501
 
 # import models into model package
+from deeprelay_sdk.models.alert_email_toggles import AlertEmailToggles
+from deeprelay_sdk.models.alert_settings import AlertSettings
+from deeprelay_sdk.models.alert_settings_update import AlertSettingsUpdate
+from deeprelay_sdk.models.api_key import ApiKey
+from deeprelay_sdk.models.api_key_create import ApiKeyCreate
+from deeprelay_sdk.models.api_key_created import ApiKeyCreated
+from deeprelay_sdk.models.api_key_list import ApiKeyList
+from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes
+from deeprelay_sdk.models.api_key_update import ApiKeyUpdate
 from deeprelay_sdk.models.balance import Balance
 from deeprelay_sdk.models.chat_choice import ChatChoice
 from deeprelay_sdk.models.chat_completion_request import ChatCompletionRequest
+from deeprelay_sdk.models.chat_completion_request_response_format import ChatCompletionRequestResponseFormat
+from deeprelay_sdk.models.chat_completion_request_tool_choice import ChatCompletionRequestToolChoice
 from deeprelay_sdk.models.chat_completion_response import ChatCompletionResponse
 from deeprelay_sdk.models.chat_message import ChatMessage
+from deeprelay_sdk.models.cost_details import CostDetails
 from deeprelay_sdk.models.create_crypto_deposit_request import CreateCryptoDepositRequest
 from deeprelay_sdk.models.create_webhook_endpoint_request import CreateWebhookEndpointRequest
 from deeprelay_sdk.models.crypto_deposit import CryptoDeposit
@@ -33,9 +45,11 @@ from deeprelay_sdk.models.images_response import ImagesResponse
 from deeprelay_sdk.models.images_response_data_inner import ImagesResponseDataInner
 from deeprelay_sdk.models.images_response_usage import ImagesResponseUsage
 from deeprelay_sdk.models.inference_preflight import InferencePreflight
+from deeprelay_sdk.models.json_schema_format import JSONSchemaFormat
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response
 from deeprelay_sdk.models.model import Model
 from deeprelay_sdk.models.model_list import ModelList
+from deeprelay_sdk.models.model_metrics import ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner
 from deeprelay_sdk.models.model_pricing import ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate
@@ -45,21 +59,37 @@ from deeprelay_sdk.models.peak_window import PeakWindow
 from deeprelay_sdk.models.problem import Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus
 from deeprelay_sdk.models.referral import Referral
+from deeprelay_sdk.models.request_log_entry import RequestLogEntry
+from deeprelay_sdk.models.request_log_page import RequestLogPage
+from deeprelay_sdk.models.response_format_json_object import ResponseFormatJSONObject
+from deeprelay_sdk.models.response_format_json_schema import ResponseFormatJSONSchema
+from deeprelay_sdk.models.response_format_text import ResponseFormatText
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions
 from deeprelay_sdk.models.subscription import Subscription
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
+from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan
 from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest
 from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession
 from deeprelay_sdk.models.subscription_price import SubscriptionPrice
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota
+from deeprelay_sdk.models.subscription_tier import SubscriptionTier
+from deeprelay_sdk.models.subscription_upgrade_request import SubscriptionUpgradeRequest
 from deeprelay_sdk.models.subscription_usage import SubscriptionUsage
+from deeprelay_sdk.models.tool import Tool
+from deeprelay_sdk.models.tool_call import ToolCall
+from deeprelay_sdk.models.tool_call_function import ToolCallFunction
+from deeprelay_sdk.models.tool_choice_function import ToolChoiceFunction
+from deeprelay_sdk.models.tool_choice_function_function import ToolChoiceFunctionFunction
+from deeprelay_sdk.models.tool_function import ToolFunction
 from deeprelay_sdk.models.update_spending_limit_request import UpdateSpendingLimitRequest
 from deeprelay_sdk.models.usage import Usage
 from deeprelay_sdk.models.usage_bucket import UsageBucket
+from deeprelay_sdk.models.usage_completion_tokens_details import UsageCompletionTokensDetails
 from deeprelay_sdk.models.usage_page import UsagePage
+from deeprelay_sdk.models.usage_prompt_tokens_details import UsagePromptTokensDetails
 from deeprelay_sdk.models.video_create_request import VideoCreateRequest
 from deeprelay_sdk.models.video_job import VideoJob
 from deeprelay_sdk.models.video_list import VideoList

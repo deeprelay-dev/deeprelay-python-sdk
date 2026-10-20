@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **model** | **str** | The canonical catalog id the request resolved to. | 
 **verdict** | **str** | &#x60;ok&#x60; — the request will be served (covered by the plan, or payable). &#x60;warn&#x60; — it will be served AND charged in a way the caller may not expect. &#x60;block&#x60; — it will be refused (402 or 429). | 
-**reason** | **str** | Stable code explaining the verdict, for clients that need their own wording. Absent on a plain &#x60;ok&#x60; that needs no explanation. | [optional] 
+**reason** | **str** | Stable code explaining the verdict, for clients that need their own wording. Absent on a plain &#x60;ok&#x60; that needs no explanation. &#x60;api_key_budget_exceeded&#x60;, &#x60;member_spend_limit_reached&#x60; and &#x60;model_not_allowed_for_key&#x60; come with &#x60;verdict: block&#x60; and only for a key that has a budget or a model allowlist, or a member that has a spend limit. | [optional] 
 **message** | **str** | A ready-to-print sentence, phrased for this exact plan/credit combination. Prefer it over composing one from verdict and reason: it improves without a client release. | 
 **plan_covered** | **bool** | Whether the subscription tier covers this model. A property of the PLATFORM, not of the caller — it stays true for an organization that has no subscription, which is what makes the \&quot;this is included in the plan\&quot; upsell honest. | 
 **subscribed** | **bool** | Whether the organization is entitled to the plan right now. | 

@@ -6,9 +6,10 @@ Optional overrides for a checkout mint. Every field has a deployment default, so
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**success_url** | **str** | Where the provider returns after a completed payment. Defaults to the deployment&#39;s configured URL. | [optional] 
-**cancel_url** | **str** | Where the provider returns if checkout is abandoned. Defaults to the deployment&#39;s configured URL. | [optional] 
-**plan_key** | **str** | Pins the plan the client displayed. An unknown key is a 400 rather than a silent purchase of a different tier. | [optional] 
+**success_url** | **str** | Where the provider returns after a completed payment. Defaults to the deployment&#39;s configured URL. Must be on the deployment&#39;s dashboard origin, else 422 &#x60;validation_failed&#x60;. | [optional] 
+**cancel_url** | **str** | Where the provider returns if checkout is abandoned. Defaults to the deployment&#39;s configured URL. Must be on the deployment&#39;s dashboard origin, else 422 &#x60;validation_failed&#x60;. | [optional] 
+**plan_key** | **str** | The plan to buy — &#x60;flat&#x60; (Base, the default) or &#x60;plus&#x60;. Pins the plan the client displayed: an unknown or un-offered key is a 400 rather than a silent purchase of a different tier. | [optional] 
+**method** | **str** | &#x60;card&#x60; (dollars, card or Link; the default) or &#x60;upi&#x60; (rupees, UPI AutoPay). On a subscribed organization, the other currency&#39;s method switches the existing plan&#39;s billing. | [optional] 
 
 ## Example
 

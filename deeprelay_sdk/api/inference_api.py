@@ -1,7 +1,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -327,6 +327,7 @@ class InferenceApi:
     def create_chat_completion(
         self,
         chat_completion_request: ChatCompletionRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -342,9 +343,12 @@ class InferenceApi:
     ) -> ChatCompletionResponse:
         """Create a chat completion (OpenAI-compatible)
 
+        OpenAI-compatible chat completion. Parameters fall into three groups:  - **Semantic parameters are gated per model.** `response_format`,   `tools`/`tool_choice`, `logprobs`/`top_logprobs` and `image_url`   content parts are sent only to a model whose `/v1/models` entry   lists the capability in `supported_parameters` (`vision` for   images). A model without it returns 400 `unsupported_parameter`   whose message names the models that do support it. When the model   supports the parameter but none of its currently routable upstreams   does, the request fails with 503 `upstream_unavailable` rather than   being silently degraded. - **Hints are forwarded or dropped, never rejected.**   `reasoning_effort`, `presence_penalty`, `frequency_penalty`, `seed`   and `parallel_tool_calls` are forwarded to an upstream that accepts   them and otherwise dropped. Every drop is reported in the   `x-deeprelay-ignored-params` response header. - **Rejected everywhere.** `logit_bias` and `function_call` return   400 `unsupported_parameter`; `input_audio` and `file` content parts   return 400 `unsupported_content_part`.  A non-strict `json_schema` sent to a model that can only guarantee JSON is served as `json_object` and reported as `response_format:downgraded`; a strict one is rejected. A `json_schema` over 64 KiB or nested deeper than 32 levels returns 400 `unsupported_parameter` (param `response_format`). An upstream rejection of a request the relay accepted returns 400 `upstream_rejected_request`. A non-chat model id returns 404 `model_not_found`. The request body is capped at 32 MiB (413 `request_too_large`).  Every successful response carries `usage.cost` and `usage.cost_details` (on a stream, only in the final usage chunk). See https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
         :param chat_completion_request: (required)
         :type chat_completion_request: ChatCompletionRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -369,6 +373,7 @@ class InferenceApi:
 
         _param = self._create_chat_completion_serialize(
             chat_completion_request=chat_completion_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -382,6 +387,7 @@ class InferenceApi:
             '402': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
             '404': "OpenAIErrorEnvelope",
+            '413': "OpenAIErrorEnvelope",
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
@@ -402,6 +408,7 @@ class InferenceApi:
     def create_chat_completion_with_http_info(
         self,
         chat_completion_request: ChatCompletionRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -417,9 +424,12 @@ class InferenceApi:
     ) -> ApiResponse[ChatCompletionResponse]:
         """Create a chat completion (OpenAI-compatible)
 
+        OpenAI-compatible chat completion. Parameters fall into three groups:  - **Semantic parameters are gated per model.** `response_format`,   `tools`/`tool_choice`, `logprobs`/`top_logprobs` and `image_url`   content parts are sent only to a model whose `/v1/models` entry   lists the capability in `supported_parameters` (`vision` for   images). A model without it returns 400 `unsupported_parameter`   whose message names the models that do support it. When the model   supports the parameter but none of its currently routable upstreams   does, the request fails with 503 `upstream_unavailable` rather than   being silently degraded. - **Hints are forwarded or dropped, never rejected.**   `reasoning_effort`, `presence_penalty`, `frequency_penalty`, `seed`   and `parallel_tool_calls` are forwarded to an upstream that accepts   them and otherwise dropped. Every drop is reported in the   `x-deeprelay-ignored-params` response header. - **Rejected everywhere.** `logit_bias` and `function_call` return   400 `unsupported_parameter`; `input_audio` and `file` content parts   return 400 `unsupported_content_part`.  A non-strict `json_schema` sent to a model that can only guarantee JSON is served as `json_object` and reported as `response_format:downgraded`; a strict one is rejected. A `json_schema` over 64 KiB or nested deeper than 32 levels returns 400 `unsupported_parameter` (param `response_format`). An upstream rejection of a request the relay accepted returns 400 `upstream_rejected_request`. A non-chat model id returns 404 `model_not_found`. The request body is capped at 32 MiB (413 `request_too_large`).  Every successful response carries `usage.cost` and `usage.cost_details` (on a stream, only in the final usage chunk). See https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
         :param chat_completion_request: (required)
         :type chat_completion_request: ChatCompletionRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -444,6 +454,7 @@ class InferenceApi:
 
         _param = self._create_chat_completion_serialize(
             chat_completion_request=chat_completion_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -457,6 +468,7 @@ class InferenceApi:
             '402': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
             '404': "OpenAIErrorEnvelope",
+            '413': "OpenAIErrorEnvelope",
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
@@ -477,6 +489,7 @@ class InferenceApi:
     def create_chat_completion_without_preload_content(
         self,
         chat_completion_request: ChatCompletionRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -492,9 +505,12 @@ class InferenceApi:
     ) -> RESTResponseType:
         """Create a chat completion (OpenAI-compatible)
 
+        OpenAI-compatible chat completion. Parameters fall into three groups:  - **Semantic parameters are gated per model.** `response_format`,   `tools`/`tool_choice`, `logprobs`/`top_logprobs` and `image_url`   content parts are sent only to a model whose `/v1/models` entry   lists the capability in `supported_parameters` (`vision` for   images). A model without it returns 400 `unsupported_parameter`   whose message names the models that do support it. When the model   supports the parameter but none of its currently routable upstreams   does, the request fails with 503 `upstream_unavailable` rather than   being silently degraded. - **Hints are forwarded or dropped, never rejected.**   `reasoning_effort`, `presence_penalty`, `frequency_penalty`, `seed`   and `parallel_tool_calls` are forwarded to an upstream that accepts   them and otherwise dropped. Every drop is reported in the   `x-deeprelay-ignored-params` response header. - **Rejected everywhere.** `logit_bias` and `function_call` return   400 `unsupported_parameter`; `input_audio` and `file` content parts   return 400 `unsupported_content_part`.  A non-strict `json_schema` sent to a model that can only guarantee JSON is served as `json_object` and reported as `response_format:downgraded`; a strict one is rejected. A `json_schema` over 64 KiB or nested deeper than 32 levels returns 400 `unsupported_parameter` (param `response_format`). An upstream rejection of a request the relay accepted returns 400 `upstream_rejected_request`. A non-chat model id returns 404 `model_not_found`. The request body is capped at 32 MiB (413 `request_too_large`).  Every successful response carries `usage.cost` and `usage.cost_details` (on a stream, only in the final usage chunk). See https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
         :param chat_completion_request: (required)
         :type chat_completion_request: ChatCompletionRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -519,6 +535,7 @@ class InferenceApi:
 
         _param = self._create_chat_completion_serialize(
             chat_completion_request=chat_completion_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -532,6 +549,7 @@ class InferenceApi:
             '402': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
             '404': "OpenAIErrorEnvelope",
+            '413': "OpenAIErrorEnvelope",
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
@@ -547,6 +565,7 @@ class InferenceApi:
     def _create_chat_completion_serialize(
         self,
         chat_completion_request,
+        x_client_request_id,
         _request_auth,
         _content_type,
         _headers,
@@ -570,6 +589,8 @@ class InferenceApi:
         # process the path parameters
         # process the query parameters
         # process the header parameters
+        if x_client_request_id is not None:
+            _header_params['X-Client-Request-Id'] = x_client_request_id
         # process the form parameters
         # process the body parameter
         if chat_completion_request is not None:
@@ -626,6 +647,7 @@ class InferenceApi:
     def create_embeddings(
         self,
         embeddings_request: EmbeddingsRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -645,6 +667,8 @@ class InferenceApi:
 
         :param embeddings_request: (required)
         :type embeddings_request: EmbeddingsRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -669,6 +693,7 @@ class InferenceApi:
 
         _param = self._create_embeddings_serialize(
             embeddings_request=embeddings_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -704,6 +729,7 @@ class InferenceApi:
     def create_embeddings_with_http_info(
         self,
         embeddings_request: EmbeddingsRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -723,6 +749,8 @@ class InferenceApi:
 
         :param embeddings_request: (required)
         :type embeddings_request: EmbeddingsRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -747,6 +775,7 @@ class InferenceApi:
 
         _param = self._create_embeddings_serialize(
             embeddings_request=embeddings_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -782,6 +811,7 @@ class InferenceApi:
     def create_embeddings_without_preload_content(
         self,
         embeddings_request: EmbeddingsRequest,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -801,6 +831,8 @@ class InferenceApi:
 
         :param embeddings_request: (required)
         :type embeddings_request: EmbeddingsRequest
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -825,6 +857,7 @@ class InferenceApi:
 
         _param = self._create_embeddings_serialize(
             embeddings_request=embeddings_request,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -855,6 +888,7 @@ class InferenceApi:
     def _create_embeddings_serialize(
         self,
         embeddings_request,
+        x_client_request_id,
         _request_auth,
         _content_type,
         _headers,
@@ -878,6 +912,8 @@ class InferenceApi:
         # process the path parameters
         # process the query parameters
         # process the header parameters
+        if x_client_request_id is not None:
+            _header_params['X-Client-Request-Id'] = x_client_request_id
         # process the form parameters
         # process the body parameter
         if embeddings_request is not None:
@@ -933,7 +969,8 @@ class InferenceApi:
     def create_image(
         self,
         images_generations_request: ImagesGenerationsRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -955,6 +992,8 @@ class InferenceApi:
         :type images_generations_request: ImagesGenerationsRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -980,6 +1019,7 @@ class InferenceApi:
         _param = self._create_image_serialize(
             images_generations_request=images_generations_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1014,7 +1054,8 @@ class InferenceApi:
     def create_image_with_http_info(
         self,
         images_generations_request: ImagesGenerationsRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1036,6 +1077,8 @@ class InferenceApi:
         :type images_generations_request: ImagesGenerationsRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1061,6 +1104,7 @@ class InferenceApi:
         _param = self._create_image_serialize(
             images_generations_request=images_generations_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1095,7 +1139,8 @@ class InferenceApi:
     def create_image_without_preload_content(
         self,
         images_generations_request: ImagesGenerationsRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1117,6 +1162,8 @@ class InferenceApi:
         :type images_generations_request: ImagesGenerationsRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1142,6 +1189,7 @@ class InferenceApi:
         _param = self._create_image_serialize(
             images_generations_request=images_generations_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1172,6 +1220,7 @@ class InferenceApi:
         self,
         images_generations_request,
         idempotency_key,
+        x_client_request_id,
         _request_auth,
         _content_type,
         _headers,
@@ -1197,6 +1246,8 @@ class InferenceApi:
         # process the header parameters
         if idempotency_key is not None:
             _header_params['Idempotency-Key'] = idempotency_key
+        if x_client_request_id is not None:
+            _header_params['X-Client-Request-Id'] = x_client_request_id
         # process the form parameters
         # process the body parameter
         if images_generations_request is not None:
@@ -1252,7 +1303,8 @@ class InferenceApi:
     def create_video(
         self,
         video_create_request: VideoCreateRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1274,6 +1326,8 @@ class InferenceApi:
         :type video_create_request: VideoCreateRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1299,6 +1353,7 @@ class InferenceApi:
         _param = self._create_video_serialize(
             video_create_request=video_create_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1330,7 +1385,8 @@ class InferenceApi:
     def create_video_with_http_info(
         self,
         video_create_request: VideoCreateRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1352,6 +1408,8 @@ class InferenceApi:
         :type video_create_request: VideoCreateRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1377,6 +1435,7 @@ class InferenceApi:
         _param = self._create_video_serialize(
             video_create_request=video_create_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1408,7 +1467,8 @@ class InferenceApi:
     def create_video_without_preload_content(
         self,
         video_create_request: VideoCreateRequest,
-        idempotency_key: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None,
+        idempotency_key: Optional[StrictStr] = None,
+        x_client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1430,6 +1490,8 @@ class InferenceApi:
         :type video_create_request: VideoCreateRequest
         :param idempotency_key:
         :type idempotency_key: str
+        :param x_client_request_id: Your own correlation id for this call, up to 128 characters. It is stored on the request-log row as `client_request_id` and can be filtered on with `GET /requests?client_request_id=`. When it is absent, an inbound `X-Request-Id` is kept in its place; the response's own `X-Request-Id` is always minted by deeprelay. Surrounding whitespace and control characters are removed; a longer value is dropped, never truncated. It is never used as a lookup key, so it does not need to be unique.
+        :type x_client_request_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1455,6 +1517,7 @@ class InferenceApi:
         _param = self._create_video_serialize(
             video_create_request=video_create_request,
             idempotency_key=idempotency_key,
+            x_client_request_id=x_client_request_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1482,6 +1545,7 @@ class InferenceApi:
         self,
         video_create_request,
         idempotency_key,
+        x_client_request_id,
         _request_auth,
         _content_type,
         _headers,
@@ -1507,6 +1571,8 @@ class InferenceApi:
         # process the header parameters
         if idempotency_key is not None:
             _header_params['Idempotency-Key'] = idempotency_key
+        if x_client_request_id is not None:
+            _header_params['X-Client-Request-Id'] = x_client_request_id
         # process the form parameters
         # process the body parameter
         if video_create_request is not None:
@@ -1577,6 +1643,7 @@ class InferenceApi:
     ) -> Model:
         """Get a specific model (OpenAI-compatible)
 
+        A key with a model allowlist gets 403 `model_not_allowed_for_key` for a model off its list, and the same 403 for an id that does not exist.
 
         :param id: (required)
         :type id: str
@@ -1647,6 +1714,7 @@ class InferenceApi:
     ) -> ApiResponse[Model]:
         """Get a specific model (OpenAI-compatible)
 
+        A key with a model allowlist gets 403 `model_not_allowed_for_key` for a model off its list, and the same 403 for an id that does not exist.
 
         :param id: (required)
         :type id: str
@@ -1717,6 +1785,7 @@ class InferenceApi:
     ) -> RESTResponseType:
         """Get a specific model (OpenAI-compatible)
 
+        A key with a model allowlist gets 403 `model_not_allowed_for_key` for a model off its list, and the same 403 for an id that does not exist.
 
         :param id: (required)
         :type id: str
@@ -2648,6 +2717,7 @@ class InferenceApi:
     def list_models(
         self,
         modality: Optional[StrictStr] = None,
+        if_none_match: Annotated[Optional[StrictStr], Field(description="An ETag from an earlier anonymous response; a match returns 304.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2663,9 +2733,12 @@ class InferenceApi:
     ) -> ModelList:
         """List available models (OpenAI-compatible)
 
+        Works with or without an API key, and returns the same body either way. Without a key the response is publicly cacheable (`Cache-Control: public, max-age=60`), carries a strong `ETag` (send `If-None-Match` to get a 304), and is rate-limited per client IP (429 `rate_limit_exceeded` with Retry-After). With a key it is `Cache-Control: private` and counts against the key's rate limit; an invalid key returns 401, it does not fall back to anonymous access. Error responses are `no-store`.  Each entry's `supported_parameters` is backed by live capability probes of the model's upstreams: it is the list to check before sending a gated parameter (`response_format`, `structured_outputs`, `logprobs`, `tools`, `vision`, ...).  One exception to \"the same body\": a key with a model allowlist (`allowed_models`) sees only the models on its list.  Each entry may carry a `metrics` object (always the last key): measured time to first token, decode rate and success rate over a rolling window of deeprelay customer traffic. Below the sample minimum `insufficient_data` is true and the figure is omitted, never zero. 
 
         :param modality:
         :type modality: str
+        :param if_none_match: An ETag from an earlier anonymous response; a match returns 304.
+        :type if_none_match: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2690,6 +2763,7 @@ class InferenceApi:
 
         _param = self._list_models_serialize(
             modality=modality,
+            if_none_match=if_none_match,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2698,6 +2772,7 @@ class InferenceApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ModelList",
+            '304': None,
             '400': "OpenAIErrorEnvelope",
             '401': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
@@ -2718,6 +2793,7 @@ class InferenceApi:
     def list_models_with_http_info(
         self,
         modality: Optional[StrictStr] = None,
+        if_none_match: Annotated[Optional[StrictStr], Field(description="An ETag from an earlier anonymous response; a match returns 304.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2733,9 +2809,12 @@ class InferenceApi:
     ) -> ApiResponse[ModelList]:
         """List available models (OpenAI-compatible)
 
+        Works with or without an API key, and returns the same body either way. Without a key the response is publicly cacheable (`Cache-Control: public, max-age=60`), carries a strong `ETag` (send `If-None-Match` to get a 304), and is rate-limited per client IP (429 `rate_limit_exceeded` with Retry-After). With a key it is `Cache-Control: private` and counts against the key's rate limit; an invalid key returns 401, it does not fall back to anonymous access. Error responses are `no-store`.  Each entry's `supported_parameters` is backed by live capability probes of the model's upstreams: it is the list to check before sending a gated parameter (`response_format`, `structured_outputs`, `logprobs`, `tools`, `vision`, ...).  One exception to \"the same body\": a key with a model allowlist (`allowed_models`) sees only the models on its list.  Each entry may carry a `metrics` object (always the last key): measured time to first token, decode rate and success rate over a rolling window of deeprelay customer traffic. Below the sample minimum `insufficient_data` is true and the figure is omitted, never zero. 
 
         :param modality:
         :type modality: str
+        :param if_none_match: An ETag from an earlier anonymous response; a match returns 304.
+        :type if_none_match: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2760,6 +2839,7 @@ class InferenceApi:
 
         _param = self._list_models_serialize(
             modality=modality,
+            if_none_match=if_none_match,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2768,6 +2848,7 @@ class InferenceApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ModelList",
+            '304': None,
             '400': "OpenAIErrorEnvelope",
             '401': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
@@ -2788,6 +2869,7 @@ class InferenceApi:
     def list_models_without_preload_content(
         self,
         modality: Optional[StrictStr] = None,
+        if_none_match: Annotated[Optional[StrictStr], Field(description="An ETag from an earlier anonymous response; a match returns 304.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2803,9 +2885,12 @@ class InferenceApi:
     ) -> RESTResponseType:
         """List available models (OpenAI-compatible)
 
+        Works with or without an API key, and returns the same body either way. Without a key the response is publicly cacheable (`Cache-Control: public, max-age=60`), carries a strong `ETag` (send `If-None-Match` to get a 304), and is rate-limited per client IP (429 `rate_limit_exceeded` with Retry-After). With a key it is `Cache-Control: private` and counts against the key's rate limit; an invalid key returns 401, it does not fall back to anonymous access. Error responses are `no-store`.  Each entry's `supported_parameters` is backed by live capability probes of the model's upstreams: it is the list to check before sending a gated parameter (`response_format`, `structured_outputs`, `logprobs`, `tools`, `vision`, ...).  One exception to \"the same body\": a key with a model allowlist (`allowed_models`) sees only the models on its list.  Each entry may carry a `metrics` object (always the last key): measured time to first token, decode rate and success rate over a rolling window of deeprelay customer traffic. Below the sample minimum `insufficient_data` is true and the figure is omitted, never zero. 
 
         :param modality:
         :type modality: str
+        :param if_none_match: An ETag from an earlier anonymous response; a match returns 304.
+        :type if_none_match: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2830,6 +2915,7 @@ class InferenceApi:
 
         _param = self._list_models_serialize(
             modality=modality,
+            if_none_match=if_none_match,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2838,6 +2924,7 @@ class InferenceApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ModelList",
+            '304': None,
             '400': "OpenAIErrorEnvelope",
             '401': "OpenAIErrorEnvelope",
             '403': "OpenAIErrorEnvelope",
@@ -2853,6 +2940,7 @@ class InferenceApi:
     def _list_models_serialize(
         self,
         modality,
+        if_none_match,
         _request_auth,
         _content_type,
         _headers,
@@ -2880,6 +2968,8 @@ class InferenceApi:
             _query_params.append(('modality', modality))
             
         # process the header parameters
+        if if_none_match is not None:
+            _header_params['If-None-Match'] = if_none_match
         # process the form parameters
         # process the body parameter
 

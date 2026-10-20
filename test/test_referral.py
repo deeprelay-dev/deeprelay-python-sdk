@@ -36,8 +36,8 @@ class TestReferral(unittest.TestCase):
         model = Referral()
         if include_optional:
             return Referral(
-                code = 'GPU-7KQ2-M4XP',
-                invite_url = 'https://deeprelay.ai/r/GPU-7KQ2-M4XP',
+                code = 'DR-7KQ2-M4XP',
+                invite_url = 'https://deeprelay.ai/r/DR-7KQ2-M4XP',
                 pending = 56,
                 qualified = 56,
                 settled = 56,
@@ -57,8 +57,8 @@ class TestReferral(unittest.TestCase):
             )
         else:
             return Referral(
-                code = 'GPU-7KQ2-M4XP',
-                invite_url = 'https://deeprelay.ai/r/GPU-7KQ2-M4XP',
+                code = 'DR-7KQ2-M4XP',
+                invite_url = 'https://deeprelay.ai/r/DR-7KQ2-M4XP',
                 pending = 56,
                 qualified = 56,
                 settled = 56,

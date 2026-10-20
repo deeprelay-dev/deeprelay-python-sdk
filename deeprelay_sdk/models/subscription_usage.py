@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -20,7 +20,8 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
+from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -33,9 +34,13 @@ class SubscriptionUsage(BaseModel):
     period_end: datetime = Field(description="End of that window.")
     weighted_input_tokens: StrictInt = Field(description="Weighted input tokens spent this period, against `quota.input_tokens_monthly`.")
     weighted_output_tokens: StrictInt = Field(description="Weighted output tokens spent this period, against `quota.output_tokens_monthly`.")
-    weekly_weighted_tokens: StrictInt = Field(description="Weighted input+output tokens over the trailing 7 days, against `quota.weekly_tokens`. A rolling figure, not a period one — it can be non-zero moments after a period rolls over.")
+    weekly_weighted_input_tokens: StrictInt = Field(description="Weighted input tokens over the trailing 7 days, against `quota.weekly_input_tokens`. A rolling figure, not a period one — it can be non-zero moments after a period rolls over.")
+    weekly_weighted_output_tokens: StrictInt = Field(description="Weighted output tokens over the trailing 7 days, against `quota.weekly_output_tokens`. A rolling figure, like `weekly_weighted_input_tokens`.")
     cost_micro_cents: StrictInt = Field(description="List-price metered cost of this period's plan traffic in micro-cents (1e-6 cent), against `quota.max_usage_micro_cents`.")
-    __properties: ClassVar[List[str]] = ["period_start", "period_end", "weighted_input_tokens", "weighted_output_tokens", "weekly_weighted_tokens", "cost_micro_cents"]
+    recent_payg_calls_24h: Optional[StrictInt] = Field(default=None, description="Wallet-billed calls while subscribed, e.g. input-overshoot or quota-gate pay-as-you-go fallbacks and models the plan does not cover. Recent means the last 24 hours, clamped to the current period. Omitted when the count could not be read; its absence means unknown, not zero.")
+    by_model: Optional[List[SubscriptionModelUsage]] = Field(default=None, description="This period's plan-covered usage split by model: the raw tokens each model served, its usage factor, and the weighted tokens they drew from the allowance. Heaviest weighted input first. Each model's weighted figures round down on their own, so they can sum to slightly less than `weighted_input_tokens` / `weighted_output_tokens`, which stay authoritative. Omitted when the breakdown could not be read or there is no covered usage.")
+    weekly_by_model: Optional[List[SubscriptionModelUsage]] = Field(default=None, description="The same breakdown over the trailing 7 days, against the weekly caps. Omitted under the same conditions as `by_model`.")
+    __properties: ClassVar[List[str]] = ["period_start", "period_end", "weighted_input_tokens", "weighted_output_tokens", "weekly_weighted_input_tokens", "weekly_weighted_output_tokens", "cost_micro_cents", "recent_payg_calls_24h", "by_model", "weekly_by_model"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -76,6 +81,20 @@ class SubscriptionUsage(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in by_model (list)
+        _items = []
+        if self.by_model:
+            for _item_by_model in self.by_model:
+                if _item_by_model:
+                    _items.append(_item_by_model.to_dict())
+            _dict['by_model'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in weekly_by_model (list)
+        _items = []
+        if self.weekly_by_model:
+            for _item_weekly_by_model in self.weekly_by_model:
+                if _item_weekly_by_model:
+                    _items.append(_item_weekly_by_model.to_dict())
+            _dict['weekly_by_model'] = _items
         return _dict
 
     @classmethod
@@ -92,8 +111,12 @@ class SubscriptionUsage(BaseModel):
             "period_end": obj.get("period_end"),
             "weighted_input_tokens": obj.get("weighted_input_tokens"),
             "weighted_output_tokens": obj.get("weighted_output_tokens"),
-            "weekly_weighted_tokens": obj.get("weekly_weighted_tokens"),
-            "cost_micro_cents": obj.get("cost_micro_cents")
+            "weekly_weighted_input_tokens": obj.get("weekly_weighted_input_tokens"),
+            "weekly_weighted_output_tokens": obj.get("weekly_weighted_output_tokens"),
+            "cost_micro_cents": obj.get("cost_micro_cents"),
+            "recent_payg_calls_24h": obj.get("recent_payg_calls_24h"),
+            "by_model": [SubscriptionModelUsage.from_dict(_item) for _item in obj["by_model"]] if obj.get("by_model") is not None else None,
+            "weekly_by_model": [SubscriptionModelUsage.from_dict(_item) for _item in obj["weekly_by_model"]] if obj.get("weekly_by_model") is not None else None
         })
         return _obj
 

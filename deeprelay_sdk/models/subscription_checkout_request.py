@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,10 +28,21 @@ class SubscriptionCheckoutRequest(BaseModel):
     """
     Optional overrides for a checkout mint. Every field has a deployment default, so an empty body is the normal call. 
     """ # noqa: E501
-    success_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns after a completed payment. Defaults to the deployment's configured URL.")
-    cancel_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns if checkout is abandoned. Defaults to the deployment's configured URL.")
-    plan_key: Optional[StrictStr] = Field(default=None, description="Pins the plan the client displayed. An unknown key is a 400 rather than a silent purchase of a different tier.")
-    __properties: ClassVar[List[str]] = ["success_url", "cancel_url", "plan_key"]
+    success_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns after a completed payment. Defaults to the deployment's configured URL. Must be on the deployment's dashboard origin, else 422 `validation_failed`.")
+    cancel_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns if checkout is abandoned. Defaults to the deployment's configured URL. Must be on the deployment's dashboard origin, else 422 `validation_failed`.")
+    plan_key: Optional[StrictStr] = Field(default=None, description="The plan to buy — `flat` (Base, the default) or `plus`. Pins the plan the client displayed: an unknown or un-offered key is a 400 rather than a silent purchase of a different tier.")
+    method: Optional[StrictStr] = Field(default=None, description="`card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay). On a subscribed organization, the other currency's method switches the existing plan's billing.")
+    __properties: ClassVar[List[str]] = ["success_url", "cancel_url", "plan_key", "method"]
+
+    @field_validator('method')
+    def method_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['card', 'upi']):
+            raise ValueError("must be one of enum values ('card', 'upi')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -86,7 +97,8 @@ class SubscriptionCheckoutRequest(BaseModel):
         _obj = cls.model_validate({
             "success_url": obj.get("success_url"),
             "cancel_url": obj.get("cancel_url"),
-            "plan_key": obj.get("plan_key")
+            "plan_key": obj.get("plan_key"),
+            "method": obj.get("method")
         })
         return _obj
 

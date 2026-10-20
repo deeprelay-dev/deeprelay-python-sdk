@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -20,6 +20,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from deeprelay_sdk.models.model_metrics import ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner
 from deeprelay_sdk.models.model_pricing import ModelPricing
 from typing import Optional, Set
@@ -32,21 +34,29 @@ class Model(BaseModel):
     """ # noqa: E501
     id: StrictStr
     object: StrictStr
-    created: Optional[StrictInt] = None
-    owned_by: StrictStr
+    created: StrictInt = Field(description="Always present for OpenAI-client compatibility. Currently 0 for every model (the catalog carries no creation date); do not sort on it.")
+    owned_by: StrictStr = Field(description="The model's author (the same value as `author`), or \"deeprelay\" when the author is unknown.")
     author: Optional[StrictStr] = Field(default=None, description="Model creator/organization (e.g. \"Meta\", \"Qwen\", \"Black Forest Labs\").")
     modality: StrictStr
     category: Optional[StrictStr] = Field(default=None, description="Browse-facing category; mirrors modality (chat/image/video/embedding).")
+    tier: Optional[StrictStr] = Field(default=None, description="The serving tier this entry prices: `serverless` or `economy` today, and more values may be added. A model served on both tiers appears twice: under its bare id for `serverless`, and under the `:economy`-suffixed id for `economy`. Send the id of the tier you want. Omitted on `coming_soon` placeholder entries.")
     context_length: Optional[StrictInt] = None
+    max_completion_tokens: Optional[StrictInt] = Field(default=None, description="The model's maximum output, in tokens, from the catalog. Omitted when the catalog lists none.")
     supported_parameters: Optional[List[StrictStr]] = None
+    reasoning_efforts: Optional[List[StrictStr]] = Field(default=None, description="The `reasoning_effort` values this model accepts (for example `none`, `low`, `medium`, `high`), as the catalog lists them. Omitted when the catalog lists none.")
     parameters: Optional[List[ModelParametersInner]] = Field(default=None, description="Typed parameter descriptors for media (image/video) models — name, type, enum/bounds/default. Playgrounds render input forms from these.")
     pricing: ModelPricing
     aliases: Optional[List[StrictStr]] = None
     fine_tunable: Optional[StrictBool] = Field(default=None, description="Whether this model can be used as the base of a managed fine-tuning job. The tunable allowlist is operator-curated and much narrower than the serving catalog, so this is false for almost every model. Absent means false.")
     fine_tune_base_model: Optional[StrictStr] = Field(default=None, description="The exact id to send as `model` when creating a fine-tuning job for this entry. Present only when `fine_tunable` is true, and deliberately distinct from `id`: the allowlist matches the customer-facing base id (e.g. `qwen2.5-7b-instruct`), which a served model normally carries as an alias rather than as its namespaced catalog id.")
-    plan_covered: Optional[StrictBool] = Field(default=None, description="Whether the flat subscription tier covers this model. A covered model rides the plan's quota while the subscription is entitled and has quota left; everything else bills pay-as-you-go at list rates, as does a covered model once the quota is spent. Absent means false.  Coverage is a property of the platform, not of the caller: the flag reads the same for every organization, subscribed or not. Use `/billing/subscription` for what the caller's own plan has left.")
+    hf_repo: Optional[StrictStr] = Field(default=None, description="The Hugging Face repo that publishes this model's open weights, e.g. `meta-llama/Llama-3.3-70B-Instruct`. Send it as `base_model` to run the same model on a dedicated deployment. Absent when the weights are not public.")
+    usage_factor_milli: Optional[StrictInt] = Field(default=None, description="How heavily this model draws on the subscription quota, ×1000: each token counts as usage_factor_milli / 1000 weighted tokens toward the quota (and in cost_details.quota_units_used). Omitted at the default 1000 (1.0×).")
+    plan_covered: Optional[StrictBool] = Field(default=None, description="\"Included in the flat subscription\": whether the subscription tier covers this model. A model-level fact, the same for every caller. A covered model rides the plan's quota while the subscription is entitled and has quota left; everything else bills pay-as-you-go at list rates, as does a covered model once the quota is spent. Absent means false.  Coverage is a property of the platform, not of the caller: the flag reads the same for every organization, subscribed or not. Use `/billing/subscription` for what the caller's own plan has left.")
+    recommended_for: Optional[List[StrictStr]] = Field(default=None, description="The audiences deeprelay recommends this model for. The only value today is `coding-agents`: models tested with coding agents, which `deeprelay setup <agent>` configures. More values may be added. Omitted on every model that is not recommended.")
+    coding_agent_rank: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="The model's position in the coding-agent list, 1 first. Present exactly when `recommended_for` contains `coding-agents`; a setup command makes the rank-1 model the default.")
     status: StrictStr
-    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "context_length", "supported_parameters", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "plan_covered", "status"]
+    metrics: Optional[ModelMetrics] = None
+    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "tier", "context_length", "max_completion_tokens", "supported_parameters", "reasoning_efforts", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "hf_repo", "usage_factor_milli", "plan_covered", "recommended_for", "coding_agent_rank", "status", "metrics"]
 
     @field_validator('object')
     def object_validate_enum(cls, value):
@@ -118,6 +128,9 @@ class Model(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of pricing
         if self.pricing:
             _dict['pricing'] = self.pricing.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of metrics
+        if self.metrics:
+            _dict['metrics'] = self.metrics.to_dict()
         return _dict
 
     @classmethod
@@ -137,15 +150,23 @@ class Model(BaseModel):
             "author": obj.get("author"),
             "modality": obj.get("modality"),
             "category": obj.get("category"),
+            "tier": obj.get("tier"),
             "context_length": obj.get("context_length"),
+            "max_completion_tokens": obj.get("max_completion_tokens"),
             "supported_parameters": obj.get("supported_parameters"),
+            "reasoning_efforts": obj.get("reasoning_efforts"),
             "parameters": [ModelParametersInner.from_dict(_item) for _item in obj["parameters"]] if obj.get("parameters") is not None else None,
             "pricing": ModelPricing.from_dict(obj["pricing"]) if obj.get("pricing") is not None else None,
             "aliases": obj.get("aliases"),
             "fine_tunable": obj.get("fine_tunable"),
             "fine_tune_base_model": obj.get("fine_tune_base_model"),
+            "hf_repo": obj.get("hf_repo"),
+            "usage_factor_milli": obj.get("usage_factor_milli"),
             "plan_covered": obj.get("plan_covered"),
-            "status": obj.get("status")
+            "recommended_for": obj.get("recommended_for"),
+            "coding_agent_rank": obj.get("coding_agent_rank"),
+            "status": obj.get("status"),
+            "metrics": ModelMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None
         })
         return _obj
 

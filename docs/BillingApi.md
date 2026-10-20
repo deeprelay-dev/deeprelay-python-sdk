@@ -15,6 +15,7 @@ Method | HTTP request | Description
 [**get_subscription**](BillingApi.md#get_subscription) | **GET** /billing/subscription | Get the org subscription status and quota usage
 [**list_deposits**](BillingApi.md#list_deposits) | **GET** /billing/deposits | List stablecoin deposits
 [**update_spending_limit**](BillingApi.md#update_spending_limit) | **PUT** /billing/spending-limit | Set the org spending limit
+[**upgrade_subscription**](BillingApi.md#upgrade_subscription) | **POST** /billing/subscription/upgrade | Upgrade the subscription to a bigger plan
 
 
 # **create_crypto_deposit**
@@ -108,15 +109,17 @@ Name | Type | Description  | Notes
 
 Start a subscription checkout session
 
-Opens a hosted checkout session for the flat tier and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.
+Opens a hosted checkout session for a subscription plan and returns its URL. Requires the `billing:write` scope AND organization-admin privileges — subscribing spends organization money.
 
 This endpoint does NOT subscribe anyone. Checkout is a hosted page that needs a browser and a card, so the caller's job is to put the returned URL in front of a human. The subscription becomes active when payment completes, which is not synchronous with this call: poll `/billing/subscription` to confirm.
 
-`success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means "use every default".
+`success_url` and `cancel_url` are optional and fall back to the deployment's configured redirects, which is what lets a command-line client start a purchase without having any URLs of its own. An empty request body is valid and means "use every default". When sent, they must be on the deployment's dashboard origin, else 422 `validation_failed`.
 
-`plan_key`, when sent, pins the plan the client DISPLAYED: an unknown key is a 400 rather than a silent purchase of a different tier. Today there is one tier, so the only accepted value is its key — but sending it is the forward-compatible choice.
+`plan_key` names the plan to buy: `flat` (Base, the default when the field is omitted) or `plus`. It pins the plan the client DISPLAYED — an unknown key, or a plan this deployment does not offer, is a 400 rather than a silent purchase of a different tier. The `plans` array on `/billing/subscription` lists the accepted keys.
 
-One flat tier means at most one subscription per organization: a second checkout while an entitling subscription exists is a 409.
+One subscription per organization: a second checkout while an entitling subscription exists is a 409. To move an existing subscription to a bigger plan use `/billing/subscription/upgrade`.
+
+`method` picks how the plan is paid: `card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay, India). On an organization that already subscribes, an explicit `method` in the other currency is a switch, not a second subscription: the link saves the new card or UPI AutoPay mandate (nothing is charged), and once that completes the same plan is moved to the new currency, first charged on the current renewal date (that month is already paid). The answer then carries `switch_to` and `first_charge_at`. A switch is refused (409) within two days of renewal, while the plan is set to cancel, while an upgrade waits on its UPI payment, and in the currency the plan already uses.
 
 
 ### Example
@@ -533,7 +536,7 @@ Get the org referral code, invite link, terms and stats
 
 Returns the organization's shareable referral code and invite link (minting the code on first read), the program terms, the referrer's stats, and — when this organization itself signed up through someone else's link — its own progress toward the referee reward. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.
 
-The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The terms ride on the wire so a client never hard-codes the amounts.
+The program: share the invite link; when a friend signs up through it and spends `qualify_spend_cents` on inference, the referrer receives `reward_cents` and the friend receives `referee_reward_cents`, both as non-withdrawable credit, after a `hold_days` chargeback hold. The referrer also earns `commission_pct` percent of every real deposit the friend makes, credited as spend-only promotional credit when the deposit clears (`commission_earned_cents`). Program rewards never apply to the subscription. The terms ride on the wire so a client never hard-codes the amounts.
 
 `referred` is ABSENT (not null) for an organization nobody referred — key on its presence. This is the same contract the dashboard's referral card reads.
 
@@ -690,9 +693,11 @@ This endpoint does not need any parameter.
 
 Get the org subscription status and quota usage
 
-Returns the organization's flat-tier subscription: whether it is entitled, the current billing period, the plan's configured quota, and — for an entitled subscription — consumption against the four limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.
+Returns the organization's subscription: whether it is entitled, the current billing period, the plan it is on and that plan's configured quota, and — for an entitled subscription — consumption against the limits the server enforces on every request. Requires the `billing:read` scope. The organization is taken from the authenticated API key, never from a parameter.
 
-An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: "none"` and the quota the plan would provide, so a client can answer "what does the plan include" without a second endpoint and without an error path.
+`plan` and `quota` describe the plan the organization IS on (the Base plan for an organization that never subscribed). `plans` lists every plan this deployment offers — Base, then Plus — each with its price and quota, so a client can render an upgrade offer without a second call.
+
+An organization that never subscribed is NOT an error. It gets 200 with `subscribed: false`, `status: "none"` and the quota the Base plan would provide, so a client can answer "what does the plan include" without a second endpoint and without an error path.
 
 Read `subscribed`, not `status`, to decide whether the plan applies: `status` carries the billing provider's vocabulary, and the two can disagree — an `active` subscription just past its period end still entitles for a short grace window (renewal-webhook lag), while `past_due` and `canceled` never entitle.
 
@@ -927,6 +932,100 @@ Name | Type | Description  | Notes
 **200** | OK |  -  |
 **403** | Error response (RFC 7807) |  -  |
 **422** | Error response (RFC 7807) |  -  |
+**429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
+**0** | Error response (RFC 7807) |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **upgrade_subscription**
+> Subscription upgrade_subscription(subscription_upgrade_request)
+
+Upgrade the subscription to a bigger plan
+
+Moves the organization's EXISTING subscription onto a bigger plan. Requires the `billing:write` scope AND organization-admin privileges — an upgrade charges the organization's card on file.
+
+Unlike checkout, no hosted page is involved: the subscription's price is swapped, the new plan's FULL price is charged immediately (whenever in the cycle the upgrade happens), and a new billing period starts now. There is no credit for the unused remainder of the old plan's period, and the usage meters start from zero on the new plan because every quota window is summed over the current period. The response is the post-upgrade subscription, in the same shape as `/billing/subscription`.
+
+`plan_key` is required and names the target plan (`plus`). The target must be bigger than the plan the organization is on: upgrading to the current plan or to a smaller one is a 409 `not_an_upgrade` — downgrades go through the billing portal. An organization with no entitling subscription gets 409 `not_subscribed` and should use checkout instead. A subscription already set to end at the period close is refused with 409 `subscription_cancelling` (the upgrade would start a new period and move that end date); resume it in the portal first.
+
+If the charge cannot be collected (card declined, no payment method) the call is a 402 `payment_failed` and NOTHING changes — the organization stays on its current plan. Fix the card in the billing portal and retry.
+
+
+### Example
+
+* Bearer (deeprelay_live_<24-base62>) Authentication (bearerAuth):
+
+```python
+import deeprelay_sdk
+from deeprelay_sdk.models.subscription import Subscription
+from deeprelay_sdk.models.subscription_upgrade_request import SubscriptionUpgradeRequest
+from deeprelay_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://api.deeprelay.ai/v1
+# See configuration.py for a list of all supported configuration parameters.
+configuration = deeprelay_sdk.Configuration(
+    host = "https://api.deeprelay.ai/v1"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (deeprelay_live_<24-base62>): bearerAuth
+configuration = deeprelay_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with deeprelay_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = deeprelay_sdk.BillingApi(api_client)
+    subscription_upgrade_request = deeprelay_sdk.SubscriptionUpgradeRequest() # SubscriptionUpgradeRequest | 
+
+    try:
+        # Upgrade the subscription to a bigger plan
+        api_response = api_instance.upgrade_subscription(subscription_upgrade_request)
+        print("The response of BillingApi->upgrade_subscription:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling BillingApi->upgrade_subscription: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **subscription_upgrade_request** | [**SubscriptionUpgradeRequest**](SubscriptionUpgradeRequest.md)|  | 
+
+### Return type
+
+[**Subscription**](Subscription.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK — the subscription after the upgrade |  -  |
+**400** | Unknown plan_key, or a plan this deployment does not offer |  -  |
+**402** | Payment for the new plan failed; the current plan is unchanged |  -  |
+**403** | Not an organization admin |  -  |
+**409** | &#x60;not_subscribed&#x60; — no active subscription to upgrade (use checkout); &#x60;not_an_upgrade&#x60; — the target is the current plan or a smaller one; &#x60;subscription_cancelling&#x60; — the subscription is set to end at the period close (resume it in the portal first) |  -  |
+**422** | plan_key is missing |  -  |
+**503** | Subscription billing is not configured on this deployment |  -  |
 **429** | Rate limit exceeded (RFC 7807). Retry-After header indicates seconds to wait. |  * Retry-After - Seconds the client should wait before retrying. <br>  |
 **0** | Error response (RFC 7807) |  -  |
 

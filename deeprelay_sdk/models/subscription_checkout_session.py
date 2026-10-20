@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,8 +18,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,7 +33,19 @@ class SubscriptionCheckoutSession(BaseModel):
     checkout_url: StrictStr = Field(description="The hosted page the customer must open to pay.")
     session_id: StrictStr = Field(description="Checkout session id, for support correlation.")
     plan: SubscriptionPlan
-    __properties: ClassVar[List[str]] = ["checkout_url", "session_id", "plan"]
+    switch_to: Optional[StrictStr] = Field(default=None, description="Set when the checkout switches an existing plan's billing currency.")
+    first_charge_at: Optional[datetime] = Field(default=None, description="For a switch, when the new currency is first charged (the current renewal date).")
+    __properties: ClassVar[List[str]] = ["checkout_url", "session_id", "plan", "switch_to", "first_charge_at"]
+
+    @field_validator('switch_to')
+    def switch_to_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['card', 'upi']):
+            raise ValueError("must be one of enum values ('card', 'upi')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -90,7 +103,9 @@ class SubscriptionCheckoutSession(BaseModel):
         _obj = cls.model_validate({
             "checkout_url": obj.get("checkout_url"),
             "session_id": obj.get("session_id"),
-            "plan": SubscriptionPlan.from_dict(obj["plan"]) if obj.get("plan") is not None else None
+            "plan": SubscriptionPlan.from_dict(obj["plan"]) if obj.get("plan") is not None else None,
+            "switch_to": obj.get("switch_to"),
+            "first_charge_at": obj.get("first_charge_at")
         })
         return _obj
 

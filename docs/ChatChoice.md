@@ -7,7 +7,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **index** | **int** |  | [optional] 
 **message** | [**ChatMessage**](ChatMessage.md) |  | [optional] 
-**finish_reason** | **str** |  | [optional] 
+**finish_reason** | **str** | tool_calls appears only when the request carried tools and the model made a call, which requires a model that lists \&quot;tools\&quot; in its supported_parameters.  | [optional] 
+**logprobs** | **Dict[str, object]** | Per-token log probabilities (OpenAI shape, &#x60;content&#x60; array) when the request set logprobs: true, passed through from the serving upstream. Not comparable across upstreams or numeric precisions.  | [optional] 
 
 ## Example
 

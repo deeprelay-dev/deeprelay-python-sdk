@@ -3,7 +3,7 @@
 """
     deeprelay Public Developer API
 
-    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details. 
+    Programmatic API for deeprelay. Authenticate with API keys minted from the dashboard. See https://deeprelay.ai/docs for details.  Keys minted from the dashboard or `deeprelay login` belong to the Production server, https://api.deeprelay.ai/v1. The Demo server is an internal staging environment with its own key store.  Versioning: `/v1` is the API version. `info.version` is the revision of this `/v1` document, not a separate API.  OpenAI compatibility: chat completions follow the OpenAI request and response shapes, but not every OpenAI parameter is carried. Some are rejected with 400 `unsupported_parameter` and any parameter not declared in this spec is accepted and ignored. The full table is at https://deeprelay.ai/docs/api/inference#openai-compatibility. 
 
     The version of the OpenAPI document: 1.0.0
     Contact: support@deeprelay.ai
@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from deeprelay_sdk.models.chat_message import ChatMessage
 from typing import Optional, Set
@@ -31,8 +31,9 @@ class ChatChoice(BaseModel):
     """ # noqa: E501
     index: Optional[StrictInt] = None
     message: Optional[ChatMessage] = None
-    finish_reason: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["index", "message", "finish_reason"]
+    finish_reason: Optional[StrictStr] = Field(default=None, description="tool_calls appears only when the request carried tools and the model made a call, which requires a model that lists \"tools\" in its supported_parameters. ")
+    logprobs: Optional[Dict[str, Any]] = Field(default=None, description="Per-token log probabilities (OpenAI shape, `content` array) when the request set logprobs: true, passed through from the serving upstream. Not comparable across upstreams or numeric precisions. ")
+    __properties: ClassVar[List[str]] = ["index", "message", "finish_reason", "logprobs"]
 
     @field_validator('finish_reason')
     def finish_reason_validate_enum(cls, value):
@@ -100,7 +101,8 @@ class ChatChoice(BaseModel):
         _obj = cls.model_validate({
             "index": obj.get("index"),
             "message": ChatMessage.from_dict(obj["message"]) if obj.get("message") is not None else None,
-            "finish_reason": obj.get("finish_reason")
+            "finish_reason": obj.get("finish_reason"),
+            "logprobs": obj.get("logprobs")
         })
         return _obj
 
