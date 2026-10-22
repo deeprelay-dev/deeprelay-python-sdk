@@ -8,14 +8,15 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **code** | **str** | The organization&#39;s shareable referral code, e.g. &#x60;DR-7KQ2-M4XP&#x60;. | 
 **invite_url** | **str** | The ready-to-share invite link, &#x60;{site}/r/{code}&#x60;. | 
-**pending** | **int** | Friends who signed up through the link but have not yet reached the spend gate. | 
-**qualified** | **int** | Friends past the spend gate whose reward is inside the chargeback hold. | 
+**pending** | **int** | Friends who signed up through the link but have not yet reached the qualifying deposit. | 
+**qualified** | **int** | Friends past the qualifying deposit whose reward is inside the chargeback hold. | 
 **settled** | **int** | Referrals that have paid out. | 
 **earned_cents** | **int** | Total credit paid to this organization as a referrer. | 
 **commission_earned_cents** | **int** | Total deposit commission credited to this organization as a referrer (separate from the flat bonus in &#x60;earned_cents&#x60;). | 
 **reward_cents** | **int** | Credit paid to the referrer per settled referral. | 
 **referee_reward_cents** | **int** | Credit paid to the referred friend per settled referral. | 
-**qualify_spend_cents** | **int** | The friend&#39;s cumulative inference spend that qualifies a referral. | 
+**qualify_deposit_cents** | **int** | The friend&#39;s cumulative net real deposits (card, auto-pay and crypto, less refunds) that qualify a referral. | [optional] 
+**qualify_spend_cents** | **int** | Deprecated — referrals now qualify on deposits. Mirrors &#x60;qualify_deposit_cents&#x60;. | 
 **hold_days** | **int** | Days between qualification and payout (chargeback hold). | 
 **commission_pct** | **int** | Percentage of each real deposit a referred friend makes that is credited to the referrer as spend-only promotional credit. 0 means the commission is off. | 
 **referred** | [**RefereeStatus**](RefereeStatus.md) |  | [optional] 

@@ -31,18 +31,19 @@ class Referral(BaseModel):
     """ # noqa: E501
     code: StrictStr = Field(description="The organization's shareable referral code, e.g. `DR-7KQ2-M4XP`.", json_schema_extra={"examples": ["DR-7KQ2-M4XP"]})
     invite_url: StrictStr = Field(description="The ready-to-share invite link, `{site}/r/{code}`.", json_schema_extra={"examples": ["https://deeprelay.ai/r/DR-7KQ2-M4XP"]})
-    pending: StrictInt = Field(description="Friends who signed up through the link but have not yet reached the spend gate.")
-    qualified: StrictInt = Field(description="Friends past the spend gate whose reward is inside the chargeback hold.")
+    pending: StrictInt = Field(description="Friends who signed up through the link but have not yet reached the qualifying deposit.")
+    qualified: StrictInt = Field(description="Friends past the qualifying deposit whose reward is inside the chargeback hold.")
     settled: StrictInt = Field(description="Referrals that have paid out.")
     earned_cents: StrictInt = Field(description="Total credit paid to this organization as a referrer.")
     commission_earned_cents: StrictInt = Field(description="Total deposit commission credited to this organization as a referrer (separate from the flat bonus in `earned_cents`).")
     reward_cents: StrictInt = Field(description="Credit paid to the referrer per settled referral.")
     referee_reward_cents: StrictInt = Field(description="Credit paid to the referred friend per settled referral.")
-    qualify_spend_cents: StrictInt = Field(description="The friend's cumulative inference spend that qualifies a referral.")
+    qualify_deposit_cents: Optional[StrictInt] = Field(default=None, description="The friend's cumulative net real deposits (card, auto-pay and crypto, less refunds) that qualify a referral.")
+    qualify_spend_cents: StrictInt = Field(description="Deprecated — referrals now qualify on deposits. Mirrors `qualify_deposit_cents`.")
     hold_days: StrictInt = Field(description="Days between qualification and payout (chargeback hold).")
     commission_pct: StrictInt = Field(description="Percentage of each real deposit a referred friend makes that is credited to the referrer as spend-only promotional credit. 0 means the commission is off.")
     referred: Optional[RefereeStatus] = None
-    __properties: ClassVar[List[str]] = ["code", "invite_url", "pending", "qualified", "settled", "earned_cents", "commission_earned_cents", "reward_cents", "referee_reward_cents", "qualify_spend_cents", "hold_days", "commission_pct", "referred"]
+    __properties: ClassVar[List[str]] = ["code", "invite_url", "pending", "qualified", "settled", "earned_cents", "commission_earned_cents", "reward_cents", "referee_reward_cents", "qualify_deposit_cents", "qualify_spend_cents", "hold_days", "commission_pct", "referred"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -107,6 +108,7 @@ class Referral(BaseModel):
             "commission_earned_cents": obj.get("commission_earned_cents"),
             "reward_cents": obj.get("reward_cents"),
             "referee_reward_cents": obj.get("referee_reward_cents"),
+            "qualify_deposit_cents": obj.get("qualify_deposit_cents"),
             "qualify_spend_cents": obj.get("qualify_spend_cents"),
             "hold_days": obj.get("hold_days"),
             "commission_pct": obj.get("commission_pct"),

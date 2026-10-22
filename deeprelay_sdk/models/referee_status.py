@@ -29,20 +29,33 @@ class RefereeStatus(BaseModel):
     """
     Present only when the organization signed up through someone else's invite link: where that referral sits and how far the organization is from unlocking its own reward. 
     """ # noqa: E501
-    status: StrictStr = Field(description="Lifecycle state. `pending` until the spend gate is met; `qualified` inside the hold; `settled` once paid.")
-    spent_cents: StrictInt = Field(description="Cumulative inference spend so far.")
-    qualify_spend_cents: StrictInt = Field(description="The spend that qualifies the referral.")
+    status: StrictStr = Field(description="Lifecycle state. `pending` until the gate is met; `qualified` inside the hold; `settled` once paid; `reversed` when the qualifying deposit was refunded after payout and both rewards were taken back.")
+    gate: Optional[StrictStr] = Field(default=None, description="What qualifies this referral. `deposit` (net real deposits) for current referrals; `spend` (inference usage) for referrals made under the earlier program, which keep their original terms.")
+    progress_cents: Optional[StrictInt] = Field(default=None, description="Progress toward the gate so far — net deposits for `deposit`, inference spend for `spend`.")
+    goal_cents: Optional[StrictInt] = Field(default=None, description="The amount that qualifies the referral.")
+    spent_cents: StrictInt = Field(description="Deprecated alias of `progress_cents`.")
+    qualify_spend_cents: StrictInt = Field(description="Deprecated alias of `goal_cents`.")
     reward_cents: StrictInt = Field(description="What this organization receives on settlement.")
-    qualified_at: Optional[datetime] = Field(default=None, description="When the spend gate was met. Absent while pending.")
+    qualified_at: Optional[datetime] = Field(default=None, description="When the gate was met. Absent while pending.")
     hold_until: Optional[datetime] = Field(default=None, description="When the hold ends and both halves pay out. Absent while pending.")
     settled_at: Optional[datetime] = Field(default=None, description="When the reward was paid. Absent until settled.")
-    __properties: ClassVar[List[str]] = ["status", "spent_cents", "qualify_spend_cents", "reward_cents", "qualified_at", "hold_until", "settled_at"]
+    __properties: ClassVar[List[str]] = ["status", "gate", "progress_cents", "goal_cents", "spent_cents", "qualify_spend_cents", "reward_cents", "qualified_at", "hold_until", "settled_at"]
 
     @field_validator('status')
     def status_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['pending', 'qualified', 'settled', 'rejected']):
-            raise ValueError("must be one of enum values ('pending', 'qualified', 'settled', 'rejected')")
+        if value not in set(['pending', 'qualified', 'settled', 'rejected', 'reversed']):
+            raise ValueError("must be one of enum values ('pending', 'qualified', 'settled', 'rejected', 'reversed')")
+        return value
+
+    @field_validator('gate')
+    def gate_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['deposit', 'spend']):
+            raise ValueError("must be one of enum values ('deposit', 'spend')")
         return value
 
     model_config = ConfigDict(
@@ -97,6 +110,9 @@ class RefereeStatus(BaseModel):
 
         _obj = cls.model_validate({
             "status": obj.get("status"),
+            "gate": obj.get("gate"),
+            "progress_cents": obj.get("progress_cents"),
+            "goal_cents": obj.get("goal_cents"),
             "spent_cents": obj.get("spent_cents"),
             "qualify_spend_cents": obj.get("qualify_spend_cents"),
             "reward_cents": obj.get("reward_cents"),
