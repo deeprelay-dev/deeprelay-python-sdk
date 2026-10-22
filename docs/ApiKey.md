@@ -16,6 +16,9 @@ Name | Type | Description | Notes
 **budget_resets_at** | **datetime** | When the budget resets. Present when the key has a budget. | [optional] 
 **allowed_models** | **List[str]** | The models this key may call. Null means every model. A call for any other model is refused with 403 &#x60;model_not_allowed_for_key&#x60;, and &#x60;GET /models&#x60; lists only these. | 
 **stale_models** | **List[str]** | Entries of &#x60;allowed_models&#x60; that are no longer in the catalog. | [optional] 
+**fallback_models** | **List[str]** | Backup models in priority order, applied to every model this key calls. Null means model fallback is off (the default). If every provider for the requested model fails before the first token with a temporary error, the next entry is tried. Entries are kept when a model leaves the plan roster or the catalog and are skipped at request time; see &#x60;fallback_entries&#x60;. Not applied to Liquid. | 
+**fallback_entries** | [**List[ApiKeyFallbackEntry]**](ApiKeyFallbackEntry.md) | Present when &#x60;fallback_models&#x60; is set: one entry per backup, in order, explaining it as of now. | [optional] 
+**primary_model** | **str** | The model this key requested most over the last 30 days, which &#x60;above_primary&#x60; is measured against. Present only for a key with &#x60;fallback_models&#x60; and recent usage. | [optional] 
 **rate_limit_rps** | **int** |  | 
 **rate_limit_burst** | **int** |  | 
 **expires_at** | **datetime** |  | 

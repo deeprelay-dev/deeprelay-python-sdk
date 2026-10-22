@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 # Define package exports
 __all__ = [
@@ -42,6 +42,7 @@ __all__ = [
     "ApiKey",
     "ApiKeyCreate",
     "ApiKeyCreated",
+    "ApiKeyFallbackEntry",
     "ApiKeyList",
     "ApiKeyScopes",
     "ApiKeyUpdate",
@@ -81,6 +82,7 @@ __all__ = [
     "Problem",
     "RefereeStatus",
     "Referral",
+    "RequestAttempt",
     "RequestLogEntry",
     "RequestLogPage",
     "ResponseFormatJSONObject",
@@ -147,6 +149,7 @@ from deeprelay_sdk.models.alert_settings_update import AlertSettingsUpdate as Al
 from deeprelay_sdk.models.api_key import ApiKey as ApiKey
 from deeprelay_sdk.models.api_key_create import ApiKeyCreate as ApiKeyCreate
 from deeprelay_sdk.models.api_key_created import ApiKeyCreated as ApiKeyCreated
+from deeprelay_sdk.models.api_key_fallback_entry import ApiKeyFallbackEntry as ApiKeyFallbackEntry
 from deeprelay_sdk.models.api_key_list import ApiKeyList as ApiKeyList
 from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes as ApiKeyScopes
 from deeprelay_sdk.models.api_key_update import ApiKeyUpdate as ApiKeyUpdate
@@ -186,6 +189,7 @@ from deeprelay_sdk.models.peak_window import PeakWindow as PeakWindow
 from deeprelay_sdk.models.problem import Problem as Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus as RefereeStatus
 from deeprelay_sdk.models.referral import Referral as Referral
+from deeprelay_sdk.models.request_attempt import RequestAttempt as RequestAttempt
 from deeprelay_sdk.models.request_log_entry import RequestLogEntry as RequestLogEntry
 from deeprelay_sdk.models.request_log_page import RequestLogPage as RequestLogPage
 from deeprelay_sdk.models.response_format_json_object import ResponseFormatJSONObject as ResponseFormatJSONObject

@@ -35,6 +35,7 @@ class ChatCompletionRequest(BaseModel):
     ChatCompletionRequest
     """ # noqa: E501
     model: StrictStr = Field(description="Canonical model id, e.g. \"deeprelay/llama-3.3-70b-instruct\".")
+    models: Optional[Annotated[List[Annotated[str, Field(strict=True, max_length=256)]], Field(max_length=4)]] = Field(default=None, description="OpenRouter-compatible backup models for this request. `model` is the requested model and `models` lists the backups in priority order; when `model` is empty, the first entry of `models` is the requested model. An entry naming the requested model is ignored. At most 3 backups. The list replaces the API key's `fallback_models` for this request, and an empty array turns model fallback off for this request. Each backup must still pass the key's model allowlist, the request's billing mode and its capability needs, or it is skipped. Sending both `models` and the X-Deeprelay-Fallback-Models header is a 400 `invalid_request`. Chat completions only; on `/messages` and `/responses` use the header.")
     messages: List[ChatMessage]
     temperature: Optional[Union[StrictFloat, StrictInt]] = None
     max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
@@ -51,7 +52,7 @@ class ChatCompletionRequest(BaseModel):
     parallel_tool_calls: Optional[StrictBool] = Field(default=None, description="Whether the model may emit several tool calls in one turn. When false and the serving upstream cannot honour it, the relay returns only the first tool call and reports `parallel_tool_calls:enforced` in x-deeprelay-ignored-params. ")
     logprobs: Optional[StrictBool] = Field(default=None, description="Return per-token log probabilities in choices[].logprobs. Gated per model (\"logprobs\" in supported_parameters). Values come from the serving upstream and are not comparable across upstreams or numeric precisions. ")
     top_logprobs: Optional[Annotated[int, Field(le=20, strict=True, ge=0)]] = Field(default=None, description="Number of alternatives per token (requires logprobs). Gated per model; each model has its own maximum, and a larger value returns 400 unsupported_parameter. ")
-    __properties: ClassVar[List[str]] = ["model", "messages", "temperature", "max_tokens", "max_completion_tokens", "stream", "stream_options", "tools", "tool_choice", "response_format", "reasoning_effort", "presence_penalty", "frequency_penalty", "seed", "parallel_tool_calls", "logprobs", "top_logprobs"]
+    __properties: ClassVar[List[str]] = ["model", "models", "messages", "temperature", "max_tokens", "max_completion_tokens", "stream", "stream_options", "tools", "tool_choice", "response_format", "reasoning_effort", "presence_penalty", "frequency_penalty", "seed", "parallel_tool_calls", "logprobs", "top_logprobs"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -115,6 +116,11 @@ class ChatCompletionRequest(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of response_format
         if self.response_format:
             _dict['response_format'] = self.response_format.to_dict()
+        # set to None if models (nullable) is None
+        # and model_fields_set contains the field
+        if self.models is None and "models" in self.model_fields_set:
+            _dict['models'] = None
+
         return _dict
 
     @classmethod
@@ -128,6 +134,7 @@ class ChatCompletionRequest(BaseModel):
 
         _obj = cls.model_validate({
             "model": obj.get("model"),
+            "models": obj.get("models"),
             "messages": [ChatMessage.from_dict(_item) for _item in obj["messages"]] if obj.get("messages") is not None else None,
             "temperature": obj.get("temperature"),
             "max_tokens": obj.get("max_tokens"),

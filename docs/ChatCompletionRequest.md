@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **model** | **str** | Canonical model id, e.g. \&quot;deeprelay/llama-3.3-70b-instruct\&quot;. | 
+**models** | **List[str]** | OpenRouter-compatible backup models for this request. &#x60;model&#x60; is the requested model and &#x60;models&#x60; lists the backups in priority order; when &#x60;model&#x60; is empty, the first entry of &#x60;models&#x60; is the requested model. An entry naming the requested model is ignored. At most 3 backups. The list replaces the API key&#39;s &#x60;fallback_models&#x60; for this request, and an empty array turns model fallback off for this request. Each backup must still pass the key&#39;s model allowlist, the request&#39;s billing mode and its capability needs, or it is skipped. Sending both &#x60;models&#x60; and the X-Deeprelay-Fallback-Models header is a 400 &#x60;invalid_request&#x60;. Chat completions only; on &#x60;/messages&#x60; and &#x60;/responses&#x60; use the header. | [optional] 
 **messages** | [**List[ChatMessage]**](ChatMessage.md) |  | 
 **temperature** | **float** |  | [optional] 
 **max_tokens** | **int** |  | [optional] 

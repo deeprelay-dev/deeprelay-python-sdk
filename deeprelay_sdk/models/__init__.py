@@ -20,6 +20,7 @@ from deeprelay_sdk.models.alert_settings_update import AlertSettingsUpdate
 from deeprelay_sdk.models.api_key import ApiKey
 from deeprelay_sdk.models.api_key_create import ApiKeyCreate
 from deeprelay_sdk.models.api_key_created import ApiKeyCreated
+from deeprelay_sdk.models.api_key_fallback_entry import ApiKeyFallbackEntry
 from deeprelay_sdk.models.api_key_list import ApiKeyList
 from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes
 from deeprelay_sdk.models.api_key_update import ApiKeyUpdate
@@ -59,6 +60,7 @@ from deeprelay_sdk.models.peak_window import PeakWindow
 from deeprelay_sdk.models.problem import Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus
 from deeprelay_sdk.models.referral import Referral
+from deeprelay_sdk.models.request_attempt import RequestAttempt
 from deeprelay_sdk.models.request_log_entry import RequestLogEntry
 from deeprelay_sdk.models.request_log_page import RequestLogPage
 from deeprelay_sdk.models.response_format_json_object import ResponseFormatJSONObject

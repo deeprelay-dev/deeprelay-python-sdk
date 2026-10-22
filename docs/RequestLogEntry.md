@@ -33,6 +33,10 @@ Name | Type | Description | Notes
 **image_count** | **int** |  | [optional] 
 **video_seconds** | **int** |  | [optional] 
 **suppressed_count** | **int** | For a rejected row: how many further identical rejections in the same minute were folded into this one. | [optional] 
+**requested_model** | **str** | The model the request asked for. Always present; equal to &#x60;model&#x60; unless a backup model was tried. | [optional] 
+**served_model** | **str** | The model that produced the response. Omitted when no model served (a failed or rejected call). When a backup served, &#x60;model&#x60; is this model and the row is billed at its price. | [optional] 
+**fallback_reason** | **str** | Set when backup models were tried: the requested model&#39;s public error code (for example &#x60;upstream_timeout&#x60;). Rows with it set are the ones &#x60;fallback&#x3D;true&#x60; returns. | [optional] 
+**attempts** | [**List[RequestAttempt]**](RequestAttempt.md) | Present when backup models were tried: every model the request went through, in order, including skipped backups. Upstream providers are never named. | [optional] 
 
 ## Example
 

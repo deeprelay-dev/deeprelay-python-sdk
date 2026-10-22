@@ -28,15 +28,16 @@ from pydantic_core import to_jsonable_python
 
 class ApiKeyUpdate(BaseModel):
     """
-    Send only the fields to change. `null` clears `budget_cents`, `allowed_models` or `expires_at`. `scopes` cannot be changed.
+    Send only the fields to change. `null` clears `budget_cents`, `allowed_models`, `fallback_models` or `expires_at`. `scopes` cannot be changed.
     """ # noqa: E501
     name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=128)]] = None
     budget_cents: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     allowed_models: Optional[Annotated[List[StrictStr], Field(max_length=256)]] = None
+    fallback_models: Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=3)]] = Field(default=None, description="Replace the backup list (priority order), or `null` to turn model fallback off. Same rules as on create, judged against the key's allowlist after this update. An empty array is a 422 `validation_failed`; send `null` instead.")
     rate_limit_rps: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     rate_limit_burst: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     expires_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["name", "budget_cents", "allowed_models", "rate_limit_rps", "rate_limit_burst", "expires_at"]
+    __properties: ClassVar[List[str]] = ["name", "budget_cents", "allowed_models", "fallback_models", "rate_limit_rps", "rate_limit_burst", "expires_at"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -87,6 +88,11 @@ class ApiKeyUpdate(BaseModel):
         if self.allowed_models is None and "allowed_models" in self.model_fields_set:
             _dict['allowed_models'] = None
 
+        # set to None if fallback_models (nullable) is None
+        # and model_fields_set contains the field
+        if self.fallback_models is None and "fallback_models" in self.model_fields_set:
+            _dict['fallback_models'] = None
+
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
@@ -107,6 +113,7 @@ class ApiKeyUpdate(BaseModel):
             "name": obj.get("name"),
             "budget_cents": obj.get("budget_cents"),
             "allowed_models": obj.get("allowed_models"),
+            "fallback_models": obj.get("fallback_models"),
             "rate_limit_rps": obj.get("rate_limit_rps"),
             "rate_limit_burst": obj.get("rate_limit_burst"),
             "expires_at": obj.get("expires_at")

@@ -21,7 +21,9 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from uuid import UUID
+from deeprelay_sdk.models.api_key_fallback_entry import ApiKeyFallbackEntry
 from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes
 from typing import Optional, Set
 from typing_extensions import Self
@@ -41,13 +43,16 @@ class ApiKey(BaseModel):
     budget_resets_at: Optional[datetime] = Field(default=None, description="When the budget resets. Present when the key has a budget.")
     allowed_models: Optional[List[StrictStr]] = Field(description="The models this key may call. Null means every model. A call for any other model is refused with 403 `model_not_allowed_for_key`, and `GET /models` lists only these.")
     stale_models: Optional[List[StrictStr]] = Field(default=None, description="Entries of `allowed_models` that are no longer in the catalog.")
+    fallback_models: Optional[Annotated[List[StrictStr], Field(max_length=3)]] = Field(description="Backup models in priority order, applied to every model this key calls. Null means model fallback is off (the default). If every provider for the requested model fails before the first token with a temporary error, the next entry is tried. Entries are kept when a model leaves the plan roster or the catalog and are skipped at request time; see `fallback_entries`. Not applied to Liquid.")
+    fallback_entries: Optional[List[ApiKeyFallbackEntry]] = Field(default=None, description="Present when `fallback_models` is set: one entry per backup, in order, explaining it as of now.")
+    primary_model: Optional[StrictStr] = Field(default=None, description="The model this key requested most over the last 30 days, which `above_primary` is measured against. Present only for a key with `fallback_models` and recent usage.")
     rate_limit_rps: StrictInt
     rate_limit_burst: StrictInt
     expires_at: Optional[datetime]
     created_at: datetime
     last_used_at: Optional[datetime]
     revoked_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["api_key_id", "name", "key_prefix", "last4", "scopes", "budget_cents", "budget_used_micro_cents", "budget_resets_at", "allowed_models", "stale_models", "rate_limit_rps", "rate_limit_burst", "expires_at", "created_at", "last_used_at", "revoked_at"]
+    __properties: ClassVar[List[str]] = ["api_key_id", "name", "key_prefix", "last4", "scopes", "budget_cents", "budget_used_micro_cents", "budget_resets_at", "allowed_models", "stale_models", "fallback_models", "fallback_entries", "primary_model", "rate_limit_rps", "rate_limit_burst", "expires_at", "created_at", "last_used_at", "revoked_at"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -91,6 +96,13 @@ class ApiKey(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of scopes
         if self.scopes:
             _dict['scopes'] = self.scopes.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in fallback_entries (list)
+        _items = []
+        if self.fallback_entries:
+            for _item_fallback_entries in self.fallback_entries:
+                if _item_fallback_entries:
+                    _items.append(_item_fallback_entries.to_dict())
+            _dict['fallback_entries'] = _items
         # set to None if budget_cents (nullable) is None
         # and model_fields_set contains the field
         if self.budget_cents is None and "budget_cents" in self.model_fields_set:
@@ -100,6 +112,11 @@ class ApiKey(BaseModel):
         # and model_fields_set contains the field
         if self.allowed_models is None and "allowed_models" in self.model_fields_set:
             _dict['allowed_models'] = None
+
+        # set to None if fallback_models (nullable) is None
+        # and model_fields_set contains the field
+        if self.fallback_models is None and "fallback_models" in self.model_fields_set:
+            _dict['fallback_models'] = None
 
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
@@ -133,6 +150,9 @@ class ApiKey(BaseModel):
             "budget_resets_at": obj.get("budget_resets_at"),
             "allowed_models": obj.get("allowed_models"),
             "stale_models": obj.get("stale_models"),
+            "fallback_models": obj.get("fallback_models"),
+            "fallback_entries": [ApiKeyFallbackEntry.from_dict(_item) for _item in obj["fallback_entries"]] if obj.get("fallback_entries") is not None else None,
+            "primary_model": obj.get("primary_model"),
             "rate_limit_rps": obj.get("rate_limit_rps"),
             "rate_limit_burst": obj.get("rate_limit_burst"),
             "expires_at": obj.get("expires_at"),

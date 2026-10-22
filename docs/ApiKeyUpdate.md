@@ -1,6 +1,6 @@
 # ApiKeyUpdate
 
-Send only the fields to change. `null` clears `budget_cents`, `allowed_models` or `expires_at`. `scopes` cannot be changed.
+Send only the fields to change. `null` clears `budget_cents`, `allowed_models`, `fallback_models` or `expires_at`. `scopes` cannot be changed.
 
 ## Properties
 
@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **name** | **str** |  | [optional] 
 **budget_cents** | **int** |  | [optional] 
 **allowed_models** | **List[str]** |  | [optional] 
+**fallback_models** | **List[str]** | Replace the backup list (priority order), or &#x60;null&#x60; to turn model fallback off. Same rules as on create, judged against the key&#39;s allowlist after this update. An empty array is a 422 &#x60;validation_failed&#x60;; send &#x60;null&#x60; instead. | [optional] 
 **rate_limit_rps** | **int** |  | [optional] 
 **rate_limit_burst** | **int** |  | [optional] 
 **expires_at** | **datetime** |  | [optional] 

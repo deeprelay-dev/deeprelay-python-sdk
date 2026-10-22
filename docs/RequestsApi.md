@@ -10,11 +10,11 @@ Method | HTTP request | Description
 
 
 # **export_requests**
-> str export_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to)
+> str export_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, fallback=fallback)
 
 Export the request log as CSV
 
-Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.
+Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params, requested_model, served_model, fallback_reason`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.
 
 The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.
 
@@ -58,10 +58,11 @@ with deeprelay_sdk.ApiClient(configuration) as api_client:
     client_request_id = 'client_request_id_example' # str | Only rows whose `X-Client-Request-Id` equals this value. (optional)
     var_from = '2013-10-20T19:20:30+01:00' # datetime | Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it. (optional)
     to = '2013-10-20T19:20:30+01:00' # datetime | Exclusive RFC 3339 range end. Defaults to now; must be after `from`. (optional)
+    fallback = True # bool | `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400. (optional)
 
     try:
         # Export the request log as CSV
-        api_response = api_instance.export_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to)
+        api_response = api_instance.export_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, fallback=fallback)
         print("The response of RequestsApi->export_requests:\n")
         pprint(api_response)
     except Exception as e:
@@ -83,6 +84,7 @@ Name | Type | Description  | Notes
  **client_request_id** | **str**| Only rows whose &#x60;X-Client-Request-Id&#x60; equals this value. | [optional] 
  **var_from** | **datetime**| Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it. | [optional] 
  **to** | **datetime**| Exclusive RFC 3339 range end. Defaults to now; must be after &#x60;from&#x60;. | [optional] 
+ **fallback** | **bool**| &#x60;true&#x60; returns only rows a backup model served or where backups were tried (&#x60;fallback_reason&#x60; is set); &#x60;false&#x60; or absent applies no filter. Any other value is a 400. | [optional] 
 
 ### Return type
 
@@ -192,7 +194,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_requests**
-> RequestLogPage list_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, cursor=cursor, limit=limit)
+> RequestLogPage list_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, fallback=fallback, cursor=cursor, limit=limit)
 
 List requests (the request log)
 
@@ -243,12 +245,13 @@ with deeprelay_sdk.ApiClient(configuration) as api_client:
     client_request_id = 'client_request_id_example' # str | Only rows whose `X-Client-Request-Id` equals this value. (optional)
     var_from = '2013-10-20T19:20:30+01:00' # datetime | Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it. (optional)
     to = '2013-10-20T19:20:30+01:00' # datetime | Exclusive RFC 3339 range end. Defaults to now; must be after `from`. (optional)
+    fallback = True # bool | `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400. (optional)
     cursor = 'cursor_example' # str |  (optional)
     limit = 50 # int | Page size. Defaults to 50; values above 100 are clamped to 100. (optional) (default to 50)
 
     try:
         # List requests (the request log)
-        api_response = api_instance.list_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, cursor=cursor, limit=limit)
+        api_response = api_instance.list_requests(key=key, model=model, surface=surface, status=status, error_code=error_code, client_request_id=client_request_id, var_from=var_from, to=to, fallback=fallback, cursor=cursor, limit=limit)
         print("The response of RequestsApi->list_requests:\n")
         pprint(api_response)
     except Exception as e:
@@ -270,6 +273,7 @@ Name | Type | Description  | Notes
  **client_request_id** | **str**| Only rows whose &#x60;X-Client-Request-Id&#x60; equals this value. | [optional] 
  **var_from** | **datetime**| Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it. | [optional] 
  **to** | **datetime**| Exclusive RFC 3339 range end. Defaults to now; must be after &#x60;from&#x60;. | [optional] 
+ **fallback** | **bool**| &#x60;true&#x60; returns only rows a backup model served or where backups were tried (&#x60;fallback_reason&#x60; is set); &#x60;false&#x60; or absent applies no filter. Any other value is a 400. | [optional] 
  **cursor** | **str**|  | [optional] 
  **limit** | **int**| Page size. Defaults to 50; values above 100 are clamped to 100. | [optional] [default to 50]
 

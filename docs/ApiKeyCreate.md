@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **scopes** | **Dict[str, object]** | One of &#x60;{\&quot;full_access\&quot;: true}&#x60;, &#x60;{\&quot;standard\&quot;: true}&#x60;, &#x60;{\&quot;read_only\&quot;: true}&#x60;, or a per-resource map such as &#x60;{\&quot;serverless\&quot;: \&quot;read\&quot;, \&quot;keys\&quot;: \&quot;write\&quot;}&#x60;. A shortcut cannot be combined with per-resource entries. | 
 **budget_cents** | **int** |  | [optional] 
 **allowed_models** | **List[str]** |  | [optional] 
+**fallback_models** | **List[str]** | Backup models in priority order. Omit it to leave model fallback off. Each entry must be a chat model in the catalog and, when the key has &#x60;allowed_models&#x60;, on that list. Duplicates are removed. An empty array, more than 3 models or an invalid entry is a 422 &#x60;validation_failed&#x60; naming the &#x60;fallback_models&#x60; field. | [optional] 
 **rate_limit_rps** | **int** |  | [optional] 
 **rate_limit_burst** | **int** |  | [optional] 
 **expires_at** | **datetime** |  | [optional] 

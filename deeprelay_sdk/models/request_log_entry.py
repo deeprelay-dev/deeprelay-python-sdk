@@ -21,6 +21,8 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from deeprelay_sdk.models.request_attempt import RequestAttempt
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -56,7 +58,11 @@ class RequestLogEntry(BaseModel):
     image_count: Optional[StrictInt] = None
     video_seconds: Optional[StrictInt] = None
     suppressed_count: Optional[StrictInt] = Field(default=None, description="For a rejected row: how many further identical rejections in the same minute were folded into this one.")
-    __properties: ClassVar[List[str]] = ["request_id", "client_request_id", "occurred_at", "surface", "model", "key_id", "key_name", "key_prefix", "status", "http_status", "error_code", "finish_reason", "prompt_tokens", "completion_tokens", "cached_tokens", "reasoning_tokens", "quota_units", "cost", "cost_micro_cents", "plan_covered", "ttft_ms", "duration_ms", "ignored_params", "had_tool_calls", "image_count", "video_seconds", "suppressed_count"]
+    requested_model: Optional[StrictStr] = Field(default=None, description="The model the request asked for. Always present; equal to `model` unless a backup model was tried.")
+    served_model: Optional[StrictStr] = Field(default=None, description="The model that produced the response. Omitted when no model served (a failed or rejected call). When a backup served, `model` is this model and the row is billed at its price.")
+    fallback_reason: Optional[StrictStr] = Field(default=None, description="Set when backup models were tried: the requested model's public error code (for example `upstream_timeout`). Rows with it set are the ones `fallback=true` returns.")
+    attempts: Optional[Annotated[List[RequestAttempt], Field(max_length=4)]] = Field(default=None, description="Present when backup models were tried: every model the request went through, in order, including skipped backups. Upstream providers are never named.")
+    __properties: ClassVar[List[str]] = ["request_id", "client_request_id", "occurred_at", "surface", "model", "key_id", "key_name", "key_prefix", "status", "http_status", "error_code", "finish_reason", "prompt_tokens", "completion_tokens", "cached_tokens", "reasoning_tokens", "quota_units", "cost", "cost_micro_cents", "plan_covered", "ttft_ms", "duration_ms", "ignored_params", "had_tool_calls", "image_count", "video_seconds", "suppressed_count", "requested_model", "served_model", "fallback_reason", "attempts"]
 
     @field_validator('surface')
     def surface_validate_enum(cls, value):
@@ -111,6 +117,13 @@ class RequestLogEntry(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in attempts (list)
+        _items = []
+        if self.attempts:
+            for _item_attempts in self.attempts:
+                if _item_attempts:
+                    _items.append(_item_attempts.to_dict())
+            _dict['attempts'] = _items
         return _dict
 
     @classmethod
@@ -149,7 +162,11 @@ class RequestLogEntry(BaseModel):
             "had_tool_calls": obj.get("had_tool_calls"),
             "image_count": obj.get("image_count"),
             "video_seconds": obj.get("video_seconds"),
-            "suppressed_count": obj.get("suppressed_count")
+            "suppressed_count": obj.get("suppressed_count"),
+            "requested_model": obj.get("requested_model"),
+            "served_model": obj.get("served_model"),
+            "fallback_reason": obj.get("fallback_reason"),
+            "attempts": [RequestAttempt.from_dict(_item) for _item in obj["attempts"]] if obj.get("attempts") is not None else None
         })
         return _obj
 

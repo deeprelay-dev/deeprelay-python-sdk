@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from datetime import datetime
-from pydantic import Field, StrictStr, field_validator
+from pydantic import Field, StrictBool, StrictStr, field_validator
 from typing import Optional
 from typing_extensions import Annotated
 from uuid import UUID
@@ -53,6 +53,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -68,7 +69,7 @@ class RequestsApi:
     ) -> str:
         """Export the request log as CSV
 
-        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
+        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params, requested_model, served_model, fallback_reason`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
 
         :param key: Only rows sent with this API key (its `api_key_id`).
         :type key: UUID
@@ -86,6 +87,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -117,6 +120,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -152,6 +156,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -167,7 +172,7 @@ class RequestsApi:
     ) -> ApiResponse[str]:
         """Export the request log as CSV
 
-        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
+        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params, requested_model, served_model, fallback_reason`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
 
         :param key: Only rows sent with this API key (its `api_key_id`).
         :type key: UUID
@@ -185,6 +190,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -216,6 +223,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -251,6 +259,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -266,7 +275,7 @@ class RequestsApi:
     ) -> RESTResponseType:
         """Export the request log as CSV
 
-        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
+        Streams every request-log row matching the filters as a CSV attachment, oldest columns first: `request_id, client_request_id, occurred_at, surface, model, key_id, key_name, key_prefix, status, http_status, error_code, finish_reason, prompt_tokens, completion_tokens, cached_tokens, reasoning_tokens, quota_units, cost, plan_covered, ttft_ms, duration_ms, ignored_params, requested_model, served_model, fallback_reason`. Takes the same filters and visibility rules as `GET /requests`, without the cursor and limit.  The export is counted before anything is written. When the filters match more rows than the export cap, the answer is 422 `export_too_large` and the problem body carries `max_rows`; narrow the time range or add a filter, then export again.  Requires the `serverless:read` scope. Exports have their own, tighter per-key rate limit. 
 
         :param key: Only rows sent with this API key (its `api_key_id`).
         :type key: UUID
@@ -284,6 +293,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -315,6 +326,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -345,6 +357,7 @@ class RequestsApi:
         client_request_id,
         var_from,
         to,
+        fallback,
         _request_auth,
         _content_type,
         _headers,
@@ -412,6 +425,10 @@ class RequestsApi:
                 )
             else:
                 _query_params.append(('to', to))
+            
+        if fallback is not None:
+            
+            _query_params.append(('fallback', fallback))
             
         # process the header parameters
         # process the form parameters
@@ -733,6 +750,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Page size. Defaults to 50; values above 100 are clamped to 100.")] = None,
         _request_timeout: Union[
@@ -768,6 +786,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param cursor:
         :type cursor: str
         :param limit: Page size. Defaults to 50; values above 100 are clamped to 100.
@@ -803,6 +823,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             cursor=cursor,
             limit=limit,
             _request_auth=_request_auth,
@@ -839,6 +860,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Page size. Defaults to 50; values above 100 are clamped to 100.")] = None,
         _request_timeout: Union[
@@ -874,6 +896,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param cursor:
         :type cursor: str
         :param limit: Page size. Defaults to 50; values above 100 are clamped to 100.
@@ -909,6 +933,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             cursor=cursor,
             limit=limit,
             _request_auth=_request_auth,
@@ -945,6 +970,7 @@ class RequestsApi:
         client_request_id: Annotated[Optional[Annotated[str, Field(strict=True, max_length=128)]], Field(description="Only rows whose `X-Client-Request-Id` equals this value.")] = None,
         var_from: Annotated[Optional[datetime], Field(description="Inclusive RFC 3339 range start. Defaults to the start of the 90-day window; an older value is clamped to it.")] = None,
         to: Annotated[Optional[datetime], Field(description="Exclusive RFC 3339 range end. Defaults to now; must be after `from`.")] = None,
+        fallback: Annotated[Optional[StrictBool], Field(description="`true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.")] = None,
         cursor: Optional[StrictStr] = None,
         limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Page size. Defaults to 50; values above 100 are clamped to 100.")] = None,
         _request_timeout: Union[
@@ -980,6 +1006,8 @@ class RequestsApi:
         :type var_from: datetime
         :param to: Exclusive RFC 3339 range end. Defaults to now; must be after `from`.
         :type to: datetime
+        :param fallback: `true` returns only rows a backup model served or where backups were tried (`fallback_reason` is set); `false` or absent applies no filter. Any other value is a 400.
+        :type fallback: bool
         :param cursor:
         :type cursor: str
         :param limit: Page size. Defaults to 50; values above 100 are clamped to 100.
@@ -1015,6 +1043,7 @@ class RequestsApi:
             client_request_id=client_request_id,
             var_from=var_from,
             to=to,
+            fallback=fallback,
             cursor=cursor,
             limit=limit,
             _request_auth=_request_auth,
@@ -1046,6 +1075,7 @@ class RequestsApi:
         client_request_id,
         var_from,
         to,
+        fallback,
         cursor,
         limit,
         _request_auth,
@@ -1115,6 +1145,10 @@ class RequestsApi:
                 )
             else:
                 _query_params.append(('to', to))
+            
+        if fallback is not None:
+            
+            _query_params.append(('fallback', fallback))
             
         if cursor is not None:
             

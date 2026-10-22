@@ -21,6 +21,7 @@ deeprelay_sdk/models/alert_settings_update.py
 deeprelay_sdk/models/api_key.py
 deeprelay_sdk/models/api_key_create.py
 deeprelay_sdk/models/api_key_created.py
+deeprelay_sdk/models/api_key_fallback_entry.py
 deeprelay_sdk/models/api_key_list.py
 deeprelay_sdk/models/api_key_scopes.py
 deeprelay_sdk/models/api_key_update.py
@@ -60,6 +61,7 @@ deeprelay_sdk/models/peak_window.py
 deeprelay_sdk/models/problem.py
 deeprelay_sdk/models/referee_status.py
 deeprelay_sdk/models/referral.py
+deeprelay_sdk/models/request_attempt.py
 deeprelay_sdk/models/request_log_entry.py
 deeprelay_sdk/models/request_log_page.py
 deeprelay_sdk/models/response_format_json_object.py
@@ -105,6 +107,7 @@ docs/AlertsApi.md
 docs/ApiKey.md
 docs/ApiKeyCreate.md
 docs/ApiKeyCreated.md
+docs/ApiKeyFallbackEntry.md
 docs/ApiKeyList.md
 docs/ApiKeyScopes.md
 docs/ApiKeyUpdate.md
@@ -148,6 +151,7 @@ docs/PeakWindow.md
 docs/Problem.md
 docs/RefereeStatus.md
 docs/Referral.md
+docs/RequestAttempt.md
 docs/RequestLogEntry.md
 docs/RequestLogPage.md
 docs/RequestsApi.md

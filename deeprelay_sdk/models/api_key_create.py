@@ -34,10 +34,11 @@ class ApiKeyCreate(BaseModel):
     scopes: Dict[str, Any] = Field(description="One of `{\"full_access\": true}`, `{\"standard\": true}`, `{\"read_only\": true}`, or a per-resource map such as `{\"serverless\": \"read\", \"keys\": \"write\"}`. A shortcut cannot be combined with per-resource entries.")
     budget_cents: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     allowed_models: Optional[Annotated[List[StrictStr], Field(max_length=256)]] = None
+    fallback_models: Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=3)]] = Field(default=None, description="Backup models in priority order. Omit it to leave model fallback off. Each entry must be a chat model in the catalog and, when the key has `allowed_models`, on that list. Duplicates are removed. An empty array, more than 3 models or an invalid entry is a 422 `validation_failed` naming the `fallback_models` field.")
     rate_limit_rps: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     rate_limit_burst: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     expires_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["name", "scopes", "budget_cents", "allowed_models", "rate_limit_rps", "rate_limit_burst", "expires_at"]
+    __properties: ClassVar[List[str]] = ["name", "scopes", "budget_cents", "allowed_models", "fallback_models", "rate_limit_rps", "rate_limit_burst", "expires_at"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -94,6 +95,7 @@ class ApiKeyCreate(BaseModel):
             "scopes": obj.get("scopes"),
             "budget_cents": obj.get("budget_cents"),
             "allowed_models": obj.get("allowed_models"),
+            "fallback_models": obj.get("fallback_models"),
             "rate_limit_rps": obj.get("rate_limit_rps"),
             "rate_limit_burst": obj.get("rate_limit_burst"),
             "expires_at": obj.get("expires_at")
