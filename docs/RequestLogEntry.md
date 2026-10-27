@@ -27,7 +27,7 @@ Name | Type | Description | Notes
 **search_result_tokens** | **int** | The subset of &#x60;prompt_tokens&#x60; that were web-search results fed back to the model. Already counted in &#x60;prompt_tokens&#x60;; do not add them again. Omitted when the call ran no search. | [optional] 
 **search_overflow_fee_micro_cents** | **int** | The wallet charge, in micro-cents, for this call&#39;s &#x60;search_overflow_count&#x60; searches at the overflow price. It is a field of this request, not a separate request: the log never lists the fee as its own row. Omitted when there was no overflow fee. | [optional] 
 **quota_units** | **int** | Weighted tokens drawn from the subscription quota. | [optional] 
-**cost** | **float** | The exact USD amount billed to the wallet, in the same format as &#x60;usage.cost&#x60;: an exact decimal with up to 8 places, emitted as a JSON number. &#x60;0&#x60; for a plan-covered, rejected or failed call. | 
+**cost** | **float** | The call&#39;s cost in USD: an exact decimal with up to 8 places, emitted as a JSON number. On a pay-as-you-go row (&#x60;plan_covered: false&#x60;) it is the amount billed to the wallet, the same figure as &#x60;usage.cost&#x60;. On a plan-covered row it is the list-price equivalent, not a charge: tokens plus every web search the allowance covered, at the per-search list price; the subscription paid for it. A paid web-search overflow fee is not included; it is in &#x60;search_overflow_fee_micro_cents&#x60;. &#x60;0&#x60; for a rejected or failed call. | 
 **cost_micro_cents** | **int** | The same amount as an integer number of micro-cents. | 
 **plan_covered** | **bool** | Whether the subscription plan paid for the call. | 
 **ttft_ms** | **int** | Time to first token, for a streamed call. | [optional] 
