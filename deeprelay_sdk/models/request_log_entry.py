@@ -47,6 +47,10 @@ class RequestLogEntry(BaseModel):
     completion_tokens: Optional[StrictInt] = None
     cached_tokens: Optional[StrictInt] = None
     reasoning_tokens: Optional[StrictInt] = None
+    search_count: Optional[StrictInt] = Field(default=None, description="Server-side web searches billed on this call (failed searches are not counted). Omitted when the call ran none.")
+    search_overflow_count: Optional[StrictInt] = Field(default=None, description="The subset of `search_count` that ran past the plan's monthly search allowance and was billed to the wallet (the organization opted in on `/search/settings`). Never greater than `search_count`. Omitted when none did.")
+    search_result_tokens: Optional[StrictInt] = Field(default=None, description="The subset of `prompt_tokens` that were web-search results fed back to the model. Already counted in `prompt_tokens`; do not add them again. Omitted when the call ran no search.")
+    search_overflow_fee_micro_cents: Optional[StrictInt] = Field(default=None, description="The wallet charge, in micro-cents, for this call's `search_overflow_count` searches at the overflow price. It is a field of this request, not a separate request: the log never lists the fee as its own row. Omitted when there was no overflow fee.")
     quota_units: Optional[StrictInt] = Field(default=None, description="Weighted tokens drawn from the subscription quota.")
     cost: Union[StrictFloat, StrictInt] = Field(description="The exact USD amount billed to the wallet, in the same format as `usage.cost`: an exact decimal with up to 8 places, emitted as a JSON number. `0` for a plan-covered, rejected or failed call.")
     cost_micro_cents: StrictInt = Field(description="The same amount as an integer number of micro-cents.")
@@ -62,7 +66,7 @@ class RequestLogEntry(BaseModel):
     served_model: Optional[StrictStr] = Field(default=None, description="The model that produced the response. Omitted when no model served (a failed or rejected call). When a backup served, `model` is this model and the row is billed at its price.")
     fallback_reason: Optional[StrictStr] = Field(default=None, description="Set when backup models were tried: the requested model's public error code (for example `upstream_timeout`). Rows with it set are the ones `fallback=true` returns.")
     attempts: Optional[Annotated[List[RequestAttempt], Field(max_length=4)]] = Field(default=None, description="Present when backup models were tried: every model the request went through, in order, including skipped backups. Upstream providers are never named.")
-    __properties: ClassVar[List[str]] = ["request_id", "client_request_id", "occurred_at", "surface", "model", "key_id", "key_name", "key_prefix", "status", "http_status", "error_code", "finish_reason", "prompt_tokens", "completion_tokens", "cached_tokens", "reasoning_tokens", "quota_units", "cost", "cost_micro_cents", "plan_covered", "ttft_ms", "duration_ms", "ignored_params", "had_tool_calls", "image_count", "video_seconds", "suppressed_count", "requested_model", "served_model", "fallback_reason", "attempts"]
+    __properties: ClassVar[List[str]] = ["request_id", "client_request_id", "occurred_at", "surface", "model", "key_id", "key_name", "key_prefix", "status", "http_status", "error_code", "finish_reason", "prompt_tokens", "completion_tokens", "cached_tokens", "reasoning_tokens", "search_count", "search_overflow_count", "search_result_tokens", "search_overflow_fee_micro_cents", "quota_units", "cost", "cost_micro_cents", "plan_covered", "ttft_ms", "duration_ms", "ignored_params", "had_tool_calls", "image_count", "video_seconds", "suppressed_count", "requested_model", "served_model", "fallback_reason", "attempts"]
 
     @field_validator('surface')
     def surface_validate_enum(cls, value):
@@ -152,6 +156,10 @@ class RequestLogEntry(BaseModel):
             "completion_tokens": obj.get("completion_tokens"),
             "cached_tokens": obj.get("cached_tokens"),
             "reasoning_tokens": obj.get("reasoning_tokens"),
+            "search_count": obj.get("search_count"),
+            "search_overflow_count": obj.get("search_overflow_count"),
+            "search_result_tokens": obj.get("search_result_tokens"),
+            "search_overflow_fee_micro_cents": obj.get("search_overflow_fee_micro_cents"),
             "quota_units": obj.get("quota_units"),
             "cost": obj.get("cost"),
             "cost_micro_cents": obj.get("cost_micro_cents"),

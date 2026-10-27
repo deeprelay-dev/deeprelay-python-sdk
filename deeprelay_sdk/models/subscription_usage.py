@@ -37,10 +37,11 @@ class SubscriptionUsage(BaseModel):
     weekly_weighted_input_tokens: StrictInt = Field(description="Weighted input tokens over the trailing 7 days, against `quota.weekly_input_tokens`. A rolling figure, not a period one — it can be non-zero moments after a period rolls over.")
     weekly_weighted_output_tokens: StrictInt = Field(description="Weighted output tokens over the trailing 7 days, against `quota.weekly_output_tokens`. A rolling figure, like `weekly_weighted_input_tokens`.")
     cost_micro_cents: StrictInt = Field(description="List-price metered cost of this period's plan traffic in micro-cents (1e-6 cent), against `quota.max_usage_micro_cents`.")
+    searches: Optional[StrictInt] = Field(default=None, description="Plan-covered web searches run this period, against `quota.searches_monthly`. Overflow searches billed to the wallet are not counted here.")
     recent_payg_calls_24h: Optional[StrictInt] = Field(default=None, description="Wallet-billed calls while subscribed, e.g. input-overshoot or quota-gate pay-as-you-go fallbacks and models the plan does not cover. Recent means the last 24 hours, clamped to the current period. Omitted when the count could not be read; its absence means unknown, not zero.")
     by_model: Optional[List[SubscriptionModelUsage]] = Field(default=None, description="This period's plan-covered usage split by model: the raw tokens each model served, its usage factor, and the weighted tokens they drew from the allowance. Heaviest weighted input first. Each model's weighted figures round down on their own, so they can sum to slightly less than `weighted_input_tokens` / `weighted_output_tokens`, which stay authoritative. Omitted when the breakdown could not be read or there is no covered usage.")
     weekly_by_model: Optional[List[SubscriptionModelUsage]] = Field(default=None, description="The same breakdown over the trailing 7 days, against the weekly caps. Omitted under the same conditions as `by_model`.")
-    __properties: ClassVar[List[str]] = ["period_start", "period_end", "weighted_input_tokens", "weighted_output_tokens", "weekly_weighted_input_tokens", "weekly_weighted_output_tokens", "cost_micro_cents", "recent_payg_calls_24h", "by_model", "weekly_by_model"]
+    __properties: ClassVar[List[str]] = ["period_start", "period_end", "weighted_input_tokens", "weighted_output_tokens", "weekly_weighted_input_tokens", "weekly_weighted_output_tokens", "cost_micro_cents", "searches", "recent_payg_calls_24h", "by_model", "weekly_by_model"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -114,6 +115,7 @@ class SubscriptionUsage(BaseModel):
             "weekly_weighted_input_tokens": obj.get("weekly_weighted_input_tokens"),
             "weekly_weighted_output_tokens": obj.get("weekly_weighted_output_tokens"),
             "cost_micro_cents": obj.get("cost_micro_cents"),
+            "searches": obj.get("searches"),
             "recent_payg_calls_24h": obj.get("recent_payg_calls_24h"),
             "by_model": [SubscriptionModelUsage.from_dict(_item) for _item in obj["by_model"]] if obj.get("by_model") is not None else None,
             "weekly_by_model": [SubscriptionModelUsage.from_dict(_item) for _item in obj["weekly_by_model"]] if obj.get("weekly_by_model") is not None else None

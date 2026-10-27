@@ -41,11 +41,12 @@ class ModelPricing(BaseModel):
     per_video_microcents: Optional[StrictInt] = Field(default=None, description="Representative per-clip price in micro-cents (1e-6 cent) for video models — a \"from\" price taken from the provider's published example rate.")
     per_video_second_cents: Optional[StrictInt] = None
     per_video_second_microcents: Optional[StrictInt] = Field(default=None, description="Exact per-second-of-output-video rate in micro-cents (1e-6 cent). Prefer this for video models.")
+    per_search_microcents: Optional[StrictInt] = Field(default=None, description="Pay-as-you-go price of one server-side web search, in micro-cents (1e-6 cent); 200000 is $2.00 per 1,000 searches. Present only on models with `web_search: true`. Charged once per search that returns results, on top of the token cost; a failed search is free. The search results the model reads are ordinary prompt tokens at the input rate. Searches inside a subscriber's monthly allowance are covered by the plan, and searches past it (when the organization opted in on `/search/settings`) bill at the separate overflow price shown there, not at this rate.")
     period: Optional[StrictStr] = Field(default=None, description="Present only on a model priced by time of day. Which side of the peak schedule the instant this response was rendered falls on; the flat rate fields above are the rates in effect at that instant. A request is billed at the rate in effect when it ARRIVES (UTC), so a caller planning a call for later should price it from `peak` / `off_peak` and `peak_windows_utc`.")
     peak_windows_utc: Optional[List[PeakWindow]] = Field(default=None, description="The daily UTC ranges during which the `peak` rates apply, start inclusive and end exclusive (\"24:00\" is a valid end; a range whose end sorts before its start wraps midnight). Present only on a model priced by time of day.")
     peak: Optional[ModelRate] = None
     off_peak: Optional[ModelRate] = None
-    __properties: ClassVar[List[str]] = ["currency", "input_per_1m_tokens_cents", "output_per_1m_tokens_cents", "cached_input_per_1m_tokens_microcents", "cached_input_per_1m_tokens_cents", "per_image_cents", "per_image_microcents", "per_mpxl_microcents", "per_video_microcents", "per_video_second_cents", "per_video_second_microcents", "period", "peak_windows_utc", "peak", "off_peak"]
+    __properties: ClassVar[List[str]] = ["currency", "input_per_1m_tokens_cents", "output_per_1m_tokens_cents", "cached_input_per_1m_tokens_microcents", "cached_input_per_1m_tokens_cents", "per_image_cents", "per_image_microcents", "per_mpxl_microcents", "per_video_microcents", "per_video_second_cents", "per_video_second_microcents", "per_search_microcents", "period", "peak_windows_utc", "peak", "off_peak"]
 
     @field_validator('period')
     def period_validate_enum(cls, value):
@@ -132,6 +133,7 @@ class ModelPricing(BaseModel):
             "per_video_microcents": obj.get("per_video_microcents"),
             "per_video_second_cents": obj.get("per_video_second_cents"),
             "per_video_second_microcents": obj.get("per_video_second_microcents"),
+            "per_search_microcents": obj.get("per_search_microcents"),
             "period": obj.get("period"),
             "peak_windows_utc": [PeakWindow.from_dict(_item) for _item in obj["peak_windows_utc"]] if obj.get("peak_windows_utc") is not None else None,
             "peak": ModelRate.from_dict(obj["peak"]) if obj.get("peak") is not None else None,

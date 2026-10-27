@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **context_length** | **int** |  | [optional] 
 **max_completion_tokens** | **int** | The model&#39;s maximum output, in tokens, from the catalog. Omitted when the catalog lists none. | [optional] 
 **supported_parameters** | **List[str]** |  | [optional] 
+**web_search** | **bool** | Whether the model can run the server-side &#x60;web_search&#x60; tool on &#x60;/messages&#x60; and &#x60;/responses&#x60;: deeprelay runs the search itself and feeds the results back to the model. True exactly where the model supports tool calling. Always present. A request that sends the tool to a model with &#x60;web_search: false&#x60; is rejected with 400 &#x60;web_search_unsupported_model&#x60;. | [optional] 
 **reasoning_efforts** | **List[str]** | The &#x60;reasoning_effort&#x60; values this model accepts (for example &#x60;none&#x60;, &#x60;low&#x60;, &#x60;medium&#x60;, &#x60;high&#x60;), as the catalog lists them. Omitted when the catalog lists none. | [optional] 
 **parameters** | [**List[ModelParametersInner]**](ModelParametersInner.md) | Typed parameter descriptors for media (image/video) models — name, type, enum/bounds/default. Playgrounds render input forms from these. | [optional] 
 **pricing** | [**ModelPricing**](ModelPricing.md) |  | 

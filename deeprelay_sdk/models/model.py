@@ -43,6 +43,7 @@ class Model(BaseModel):
     context_length: Optional[StrictInt] = None
     max_completion_tokens: Optional[StrictInt] = Field(default=None, description="The model's maximum output, in tokens, from the catalog. Omitted when the catalog lists none.")
     supported_parameters: Optional[List[StrictStr]] = None
+    web_search: Optional[StrictBool] = Field(default=None, description="Whether the model can run the server-side `web_search` tool on `/messages` and `/responses`: deeprelay runs the search itself and feeds the results back to the model. True exactly where the model supports tool calling. Always present. A request that sends the tool to a model with `web_search: false` is rejected with 400 `web_search_unsupported_model`.")
     reasoning_efforts: Optional[List[StrictStr]] = Field(default=None, description="The `reasoning_effort` values this model accepts (for example `none`, `low`, `medium`, `high`), as the catalog lists them. Omitted when the catalog lists none.")
     parameters: Optional[List[ModelParametersInner]] = Field(default=None, description="Typed parameter descriptors for media (image/video) models — name, type, enum/bounds/default. Playgrounds render input forms from these.")
     pricing: ModelPricing
@@ -56,7 +57,7 @@ class Model(BaseModel):
     coding_agent_rank: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="The model's position in the coding-agent list, 1 first. Present exactly when `recommended_for` contains `coding-agents`; a setup command makes the rank-1 model the default.")
     status: StrictStr
     metrics: Optional[ModelMetrics] = None
-    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "tier", "context_length", "max_completion_tokens", "supported_parameters", "reasoning_efforts", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "hf_repo", "usage_factor_milli", "plan_covered", "recommended_for", "coding_agent_rank", "status", "metrics"]
+    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "tier", "context_length", "max_completion_tokens", "supported_parameters", "web_search", "reasoning_efforts", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "hf_repo", "usage_factor_milli", "plan_covered", "recommended_for", "coding_agent_rank", "status", "metrics"]
 
     @field_validator('object')
     def object_validate_enum(cls, value):
@@ -154,6 +155,7 @@ class Model(BaseModel):
             "context_length": obj.get("context_length"),
             "max_completion_tokens": obj.get("max_completion_tokens"),
             "supported_parameters": obj.get("supported_parameters"),
+            "web_search": obj.get("web_search"),
             "reasoning_efforts": obj.get("reasoning_efforts"),
             "parameters": [ModelParametersInner.from_dict(_item) for _item in obj["parameters"]] if obj.get("parameters") is not None else None,
             "pricing": ModelPricing.from_dict(obj["pricing"]) if obj.get("pricing") is not None else None,

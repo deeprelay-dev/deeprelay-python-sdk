@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -32,9 +32,10 @@ class SubscriptionQuota(BaseModel):
     output_tokens_monthly: StrictInt = Field(description="Weighted output tokens included per billing period. Reasoning tokens are output tokens.")
     weekly_input_tokens: StrictInt = Field(description="Weighted input tokens allowed over a ROLLING 7-day window. This cap slides with the clock; it does not reset with the billing period. 0 means no weekly input cap is configured on this deployment.")
     weekly_output_tokens: StrictInt = Field(description="Weighted output tokens allowed over a ROLLING 7-day window, independent of the weekly input cap. Slides with the clock; it does not reset with the billing period. Reasoning tokens are output tokens. 0 means no weekly output cap is configured.")
+    searches_monthly: Optional[StrictInt] = Field(default=None, description="Server-side web searches included per billing period. When they are used up, further searches return an in-band \"allowance exhausted\" result to the model and the request still succeeds on the plan, unless the organization opted into overflow on `/search/settings`. 0 means the plan includes no searches.")
     max_usage_micro_cents: StrictInt = Field(description="Per-period backstop on list-price metered cost, in micro-cents (1e-6 cent). 0 means no backstop is configured on this deployment.")
     payg_discount_bp: StrictInt = Field(description="Deprecated and always 0. There is no subscriber discount on pay-as-you-go spend: a request that exhausts the plan quota bills at list rates, the same rates an org without a subscription pays. The field is retained so existing deserializers keep working and will be removed in the next breaking revision. Do not display it.")
-    __properties: ClassVar[List[str]] = ["input_tokens_monthly", "output_tokens_monthly", "weekly_input_tokens", "weekly_output_tokens", "max_usage_micro_cents", "payg_discount_bp"]
+    __properties: ClassVar[List[str]] = ["input_tokens_monthly", "output_tokens_monthly", "weekly_input_tokens", "weekly_output_tokens", "searches_monthly", "max_usage_micro_cents", "payg_discount_bp"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -91,6 +92,7 @@ class SubscriptionQuota(BaseModel):
             "output_tokens_monthly": obj.get("output_tokens_monthly"),
             "weekly_input_tokens": obj.get("weekly_input_tokens"),
             "weekly_output_tokens": obj.get("weekly_output_tokens"),
+            "searches_monthly": obj.get("searches_monthly"),
             "max_usage_micro_cents": obj.get("max_usage_micro_cents"),
             "payg_discount_bp": obj.get("payg_discount_bp")
         })

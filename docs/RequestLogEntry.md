@@ -22,6 +22,10 @@ Name | Type | Description | Notes
 **completion_tokens** | **int** |  | [optional] 
 **cached_tokens** | **int** |  | [optional] 
 **reasoning_tokens** | **int** |  | [optional] 
+**search_count** | **int** | Server-side web searches billed on this call (failed searches are not counted). Omitted when the call ran none. | [optional] 
+**search_overflow_count** | **int** | The subset of &#x60;search_count&#x60; that ran past the plan&#39;s monthly search allowance and was billed to the wallet (the organization opted in on &#x60;/search/settings&#x60;). Never greater than &#x60;search_count&#x60;. Omitted when none did. | [optional] 
+**search_result_tokens** | **int** | The subset of &#x60;prompt_tokens&#x60; that were web-search results fed back to the model. Already counted in &#x60;prompt_tokens&#x60;; do not add them again. Omitted when the call ran no search. | [optional] 
+**search_overflow_fee_micro_cents** | **int** | The wallet charge, in micro-cents, for this call&#39;s &#x60;search_overflow_count&#x60; searches at the overflow price. It is a field of this request, not a separate request: the log never lists the fee as its own row. Omitted when there was no overflow fee. | [optional] 
 **quota_units** | **int** | Weighted tokens drawn from the subscription quota. | [optional] 
 **cost** | **float** | The exact USD amount billed to the wallet, in the same format as &#x60;usage.cost&#x60;: an exact decimal with up to 8 places, emitted as a JSON number. &#x60;0&#x60; for a plan-covered, rejected or failed call. | 
 **cost_micro_cents** | **int** | The same amount as an integer number of micro-cents. | 
