@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **recent_payg_calls_24h** | **int** | Wallet-billed calls while subscribed, e.g. input-overshoot or quota-gate pay-as-you-go fallbacks and models the plan does not cover. Recent means the last 24 hours, clamped to the current period. Omitted when the count could not be read; its absence means unknown, not zero. | [optional] 
 **by_model** | [**List[SubscriptionModelUsage]**](SubscriptionModelUsage.md) | This period&#39;s plan-covered usage split by model: the raw tokens each model served, its usage factor, and the weighted tokens they drew from the allowance. Heaviest weighted input first. Each model&#39;s weighted figures round down on their own, so they can sum to slightly less than &#x60;weighted_input_tokens&#x60; / &#x60;weighted_output_tokens&#x60;, which stay authoritative. Omitted when the breakdown could not be read or there is no covered usage. | [optional] 
 **weekly_by_model** | [**List[SubscriptionModelUsage]**](SubscriptionModelUsage.md) | The same breakdown over the trailing 7 days, against the weekly caps. Omitted under the same conditions as &#x60;by_model&#x60;. | [optional] 
+**payg_estimate** | [**SubscriptionPaygEstimate**](SubscriptionPaygEstimate.md) |  | [optional] 
 
 ## Example
 

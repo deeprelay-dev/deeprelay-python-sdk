@@ -73,6 +73,7 @@ deeprelay_sdk/models/subscription.py
 deeprelay_sdk/models/subscription_checkout_request.py
 deeprelay_sdk/models/subscription_checkout_session.py
 deeprelay_sdk/models/subscription_model_usage.py
+deeprelay_sdk/models/subscription_payg_estimate.py
 deeprelay_sdk/models/subscription_plan.py
 deeprelay_sdk/models/subscription_portal_request.py
 deeprelay_sdk/models/subscription_portal_session.py
@@ -165,6 +166,7 @@ docs/Subscription.md
 docs/SubscriptionCheckoutRequest.md
 docs/SubscriptionCheckoutSession.md
 docs/SubscriptionModelUsage.md
+docs/SubscriptionPaygEstimate.md
 docs/SubscriptionPlan.md
 docs/SubscriptionPortalRequest.md
 docs/SubscriptionPortalSession.md

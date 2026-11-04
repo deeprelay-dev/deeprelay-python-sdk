@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.8"
+__version__ = "0.4.9"
 
 # Define package exports
 __all__ = [
@@ -94,6 +94,7 @@ __all__ = [
     "SubscriptionCheckoutRequest",
     "SubscriptionCheckoutSession",
     "SubscriptionModelUsage",
+    "SubscriptionPaygEstimate",
     "SubscriptionPlan",
     "SubscriptionPortalRequest",
     "SubscriptionPortalSession",
@@ -202,6 +203,7 @@ from deeprelay_sdk.models.subscription import Subscription as Subscription
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest as SubscriptionCheckoutRequest
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession as SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage as SubscriptionModelUsage
+from deeprelay_sdk.models.subscription_payg_estimate import SubscriptionPaygEstimate as SubscriptionPaygEstimate
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan as SubscriptionPlan
 from deeprelay_sdk.models.subscription_portal_request import SubscriptionPortalRequest as SubscriptionPortalRequest
 from deeprelay_sdk.models.subscription_portal_session import SubscriptionPortalSession as SubscriptionPortalSession
