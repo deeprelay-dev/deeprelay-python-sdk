@@ -30,6 +30,7 @@ Name | Type | Description | Notes
 **coding_agent_rank** | **int** | The model&#39;s position in the coding-agent list, 1 first. Present exactly when &#x60;recommended_for&#x60; contains &#x60;coding-agents&#x60;; a setup command makes the rank-1 model the default. | [optional] 
 **status** | **str** |  | 
 **metrics** | [**ModelMetrics**](ModelMetrics.md) |  | [optional] 
+**weights_verification** | [**WeightsVerification**](WeightsVerification.md) |  | [optional] 
 
 ## Example
 

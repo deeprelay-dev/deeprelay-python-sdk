@@ -874,10 +874,13 @@ sending a gated parameter (`response_format`,
 One exception to "the same body": a key with a model allowlist
 (`allowed_models`) sees only the models on its list.
 
-Each entry may carry a `metrics` object (always the last key):
-measured time to first token, decode rate and success rate over a
-rolling window of deeprelay customer traffic. Below the sample minimum
-`insufficient_data` is true and the figure is omitted, never zero.
+Each entry may carry a `metrics` object: measured time to first
+token, decode rate and success rate over a rolling window of deeprelay
+customer traffic. Below the sample minimum `insufficient_data` is true
+and the figure is omitted, never zero. A chat model whose open weights
+the latest public fingerprint run verified also carries a
+`weights_verification` object after it; every other model omits the
+key. These two objects are always the last keys, in that order.
 
 
 ### Example

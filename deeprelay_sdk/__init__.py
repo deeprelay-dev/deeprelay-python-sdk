@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.7"
+__version__ = "0.4.8"
 
 # Define package exports
 __all__ = [
@@ -119,6 +119,7 @@ __all__ = [
     "VideoList",
     "WebhookEndpoint",
     "WebhookEndpointPage",
+    "WeightsVerification",
 ]
 
 # import apis into sdk package
@@ -226,4 +227,5 @@ from deeprelay_sdk.models.video_job import VideoJob as VideoJob
 from deeprelay_sdk.models.video_list import VideoList as VideoList
 from deeprelay_sdk.models.webhook_endpoint import WebhookEndpoint as WebhookEndpoint
 from deeprelay_sdk.models.webhook_endpoint_page import WebhookEndpointPage as WebhookEndpointPage
+from deeprelay_sdk.models.weights_verification import WeightsVerification as WeightsVerification
 

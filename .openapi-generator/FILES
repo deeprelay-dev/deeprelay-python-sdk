@@ -98,6 +98,7 @@ deeprelay_sdk/models/video_job.py
 deeprelay_sdk/models/video_list.py
 deeprelay_sdk/models/webhook_endpoint.py
 deeprelay_sdk/models/webhook_endpoint_page.py
+deeprelay_sdk/models/weights_verification.py
 deeprelay_sdk/py.typed
 deeprelay_sdk/rest.py
 docs/AlertEmailToggles.md
@@ -191,6 +192,7 @@ docs/VideoList.md
 docs/WebhookEndpoint.md
 docs/WebhookEndpointPage.md
 docs/WebhooksApi.md
+docs/WeightsVerification.md
 requirements.txt
 setup.cfg
 setup.py

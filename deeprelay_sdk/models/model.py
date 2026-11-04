@@ -24,6 +24,7 @@ from typing_extensions import Annotated
 from deeprelay_sdk.models.model_metrics import ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner
 from deeprelay_sdk.models.model_pricing import ModelPricing
+from deeprelay_sdk.models.weights_verification import WeightsVerification
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -57,7 +58,8 @@ class Model(BaseModel):
     coding_agent_rank: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="The model's position in the coding-agent list, 1 first. Present exactly when `recommended_for` contains `coding-agents`; a setup command makes the rank-1 model the default.")
     status: StrictStr
     metrics: Optional[ModelMetrics] = None
-    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "tier", "context_length", "max_completion_tokens", "supported_parameters", "web_search", "reasoning_efforts", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "hf_repo", "usage_factor_milli", "plan_covered", "recommended_for", "coding_agent_rank", "status", "metrics"]
+    weights_verification: Optional[WeightsVerification] = None
+    __properties: ClassVar[List[str]] = ["id", "object", "created", "owned_by", "author", "modality", "category", "tier", "context_length", "max_completion_tokens", "supported_parameters", "web_search", "reasoning_efforts", "parameters", "pricing", "aliases", "fine_tunable", "fine_tune_base_model", "hf_repo", "usage_factor_milli", "plan_covered", "recommended_for", "coding_agent_rank", "status", "metrics", "weights_verification"]
 
     @field_validator('object')
     def object_validate_enum(cls, value):
@@ -132,6 +134,9 @@ class Model(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of metrics
         if self.metrics:
             _dict['metrics'] = self.metrics.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of weights_verification
+        if self.weights_verification:
+            _dict['weights_verification'] = self.weights_verification.to_dict()
         return _dict
 
     @classmethod
@@ -168,7 +173,8 @@ class Model(BaseModel):
             "recommended_for": obj.get("recommended_for"),
             "coding_agent_rank": obj.get("coding_agent_rank"),
             "status": obj.get("status"),
-            "metrics": ModelMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None
+            "metrics": ModelMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
+            "weights_verification": WeightsVerification.from_dict(obj["weights_verification"]) if obj.get("weights_verification") is not None else None
         })
         return _obj
 

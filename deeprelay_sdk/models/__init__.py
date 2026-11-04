@@ -97,4 +97,5 @@ from deeprelay_sdk.models.video_job import VideoJob
 from deeprelay_sdk.models.video_list import VideoList
 from deeprelay_sdk.models.webhook_endpoint import WebhookEndpoint
 from deeprelay_sdk.models.webhook_endpoint_page import WebhookEndpointPage
+from deeprelay_sdk.models.weights_verification import WeightsVerification
 
