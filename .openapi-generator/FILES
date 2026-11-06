@@ -57,10 +57,12 @@ deeprelay_sdk/models/model_pricing.py
 deeprelay_sdk/models/model_rate.py
 deeprelay_sdk/models/open_ai_error_envelope.py
 deeprelay_sdk/models/open_ai_error_envelope_error.py
+deeprelay_sdk/models/pay_from_balance_request.py
 deeprelay_sdk/models/peak_window.py
 deeprelay_sdk/models/problem.py
 deeprelay_sdk/models/referee_status.py
 deeprelay_sdk/models/referral.py
+deeprelay_sdk/models/renew_from_balance_request.py
 deeprelay_sdk/models/request_attempt.py
 deeprelay_sdk/models/request_log_entry.py
 deeprelay_sdk/models/request_log_page.py
@@ -70,6 +72,7 @@ deeprelay_sdk/models/response_format_text.py
 deeprelay_sdk/models/spending_limit.py
 deeprelay_sdk/models/stream_options.py
 deeprelay_sdk/models/subscription.py
+deeprelay_sdk/models/subscription_balance_payment.py
 deeprelay_sdk/models/subscription_checkout_request.py
 deeprelay_sdk/models/subscription_checkout_session.py
 deeprelay_sdk/models/subscription_model_usage.py
@@ -149,10 +152,12 @@ docs/ModelPricing.md
 docs/ModelRate.md
 docs/OpenAIErrorEnvelope.md
 docs/OpenAIErrorEnvelopeError.md
+docs/PayFromBalanceRequest.md
 docs/PeakWindow.md
 docs/Problem.md
 docs/RefereeStatus.md
 docs/Referral.md
+docs/RenewFromBalanceRequest.md
 docs/RequestAttempt.md
 docs/RequestLogEntry.md
 docs/RequestLogPage.md
@@ -163,6 +168,7 @@ docs/ResponseFormatText.md
 docs/SpendingLimit.md
 docs/StreamOptions.md
 docs/Subscription.md
+docs/SubscriptionBalancePayment.md
 docs/SubscriptionCheckoutRequest.md
 docs/SubscriptionCheckoutSession.md
 docs/SubscriptionModelUsage.md

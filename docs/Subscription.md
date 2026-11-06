@@ -15,6 +15,8 @@ Name | Type | Description | Notes
 **quota** | [**SubscriptionQuota**](SubscriptionQuota.md) |  | 
 **usage** | [**SubscriptionUsage**](SubscriptionUsage.md) |  | [optional] 
 **plans** | [**List[SubscriptionTier]**](SubscriptionTier.md) | Every plan this deployment offers, smallest first (Base, then Plus when it is configured), each with its price and quota. The keys are the accepted &#x60;plan_key&#x60; values for checkout and upgrade. Empty when nothing can be bought here. | 
+**renew_from_balance** | **bool** | Whether each renewal is paid from deposited balance when it covers the full price (see &#x60;/billing/subscription/renew-from-balance&#x60;). | 
+**balance_payment** | [**SubscriptionBalancePayment**](SubscriptionBalancePayment.md) |  | [optional] 
 
 ## Example
 

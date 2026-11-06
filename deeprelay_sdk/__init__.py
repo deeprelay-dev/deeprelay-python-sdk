@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.9"
+__version__ = "0.4.10"
 
 # Define package exports
 __all__ = [
@@ -78,10 +78,12 @@ __all__ = [
     "ModelRate",
     "OpenAIErrorEnvelope",
     "OpenAIErrorEnvelopeError",
+    "PayFromBalanceRequest",
     "PeakWindow",
     "Problem",
     "RefereeStatus",
     "Referral",
+    "RenewFromBalanceRequest",
     "RequestAttempt",
     "RequestLogEntry",
     "RequestLogPage",
@@ -91,6 +93,7 @@ __all__ = [
     "SpendingLimit",
     "StreamOptions",
     "Subscription",
+    "SubscriptionBalancePayment",
     "SubscriptionCheckoutRequest",
     "SubscriptionCheckoutSession",
     "SubscriptionModelUsage",
@@ -187,10 +190,12 @@ from deeprelay_sdk.models.model_pricing import ModelPricing as ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate as ModelRate
 from deeprelay_sdk.models.open_ai_error_envelope import OpenAIErrorEnvelope as OpenAIErrorEnvelope
 from deeprelay_sdk.models.open_ai_error_envelope_error import OpenAIErrorEnvelopeError as OpenAIErrorEnvelopeError
+from deeprelay_sdk.models.pay_from_balance_request import PayFromBalanceRequest as PayFromBalanceRequest
 from deeprelay_sdk.models.peak_window import PeakWindow as PeakWindow
 from deeprelay_sdk.models.problem import Problem as Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus as RefereeStatus
 from deeprelay_sdk.models.referral import Referral as Referral
+from deeprelay_sdk.models.renew_from_balance_request import RenewFromBalanceRequest as RenewFromBalanceRequest
 from deeprelay_sdk.models.request_attempt import RequestAttempt as RequestAttempt
 from deeprelay_sdk.models.request_log_entry import RequestLogEntry as RequestLogEntry
 from deeprelay_sdk.models.request_log_page import RequestLogPage as RequestLogPage
@@ -200,6 +205,7 @@ from deeprelay_sdk.models.response_format_text import ResponseFormatText as Resp
 from deeprelay_sdk.models.spending_limit import SpendingLimit as SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions as StreamOptions
 from deeprelay_sdk.models.subscription import Subscription as Subscription
+from deeprelay_sdk.models.subscription_balance_payment import SubscriptionBalancePayment as SubscriptionBalancePayment
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest as SubscriptionCheckoutRequest
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession as SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage as SubscriptionModelUsage

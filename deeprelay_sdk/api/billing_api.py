@@ -23,7 +23,9 @@ from deeprelay_sdk.models.balance import Balance
 from deeprelay_sdk.models.create_crypto_deposit_request import CreateCryptoDepositRequest
 from deeprelay_sdk.models.crypto_deposit import CryptoDeposit
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response
+from deeprelay_sdk.models.pay_from_balance_request import PayFromBalanceRequest
 from deeprelay_sdk.models.referral import Referral
+from deeprelay_sdk.models.renew_from_balance_request import RenewFromBalanceRequest
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.subscription import Subscription
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
@@ -2709,6 +2711,601 @@ class BillingApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/billing/deposits',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def pay_plan_from_balance(
+        self,
+        pay_from_balance_request: PayFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Subscription:
+        """Pay for a plan from deposited balance
+
+        Starts a plan, or upgrades to a bigger one, paid in full from the organization's deposited balance instead of a card. Requires the `billing:write` scope AND organization-admin privileges.  Only deposited cash can pay: card and UPI deposits once they are 24 hours old, auto-pay top-ups, and settled crypto deposits. Free credit never can — referral bonuses and commissions, promo deposit matches, credit codes, post rewards and other staff grants, downtime credits and manual adjustments. Inference spends free credit first, so cash is what remains after usage has used up free credit. Payment is all-or-nothing at the plan's US-dollar price: there is no balance-plus-card split.  With no active subscription the call starts `plan_key` and the new plan renews from balance by default (see `renew-from-balance`). With one, `plan_key` must be a bigger plan and the call is an upgrade on the same terms as `/billing/subscription/upgrade`: the full new price now and a new billing period from now. 
+
+        :param pay_from_balance_request: (required)
+        :type pay_from_balance_request: PayFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._pay_plan_from_balance_serialize(
+            pay_from_balance_request=pay_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '502': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def pay_plan_from_balance_with_http_info(
+        self,
+        pay_from_balance_request: PayFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Subscription]:
+        """Pay for a plan from deposited balance
+
+        Starts a plan, or upgrades to a bigger one, paid in full from the organization's deposited balance instead of a card. Requires the `billing:write` scope AND organization-admin privileges.  Only deposited cash can pay: card and UPI deposits once they are 24 hours old, auto-pay top-ups, and settled crypto deposits. Free credit never can — referral bonuses and commissions, promo deposit matches, credit codes, post rewards and other staff grants, downtime credits and manual adjustments. Inference spends free credit first, so cash is what remains after usage has used up free credit. Payment is all-or-nothing at the plan's US-dollar price: there is no balance-plus-card split.  With no active subscription the call starts `plan_key` and the new plan renews from balance by default (see `renew-from-balance`). With one, `plan_key` must be a bigger plan and the call is an upgrade on the same terms as `/billing/subscription/upgrade`: the full new price now and a new billing period from now. 
+
+        :param pay_from_balance_request: (required)
+        :type pay_from_balance_request: PayFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._pay_plan_from_balance_serialize(
+            pay_from_balance_request=pay_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '502': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def pay_plan_from_balance_without_preload_content(
+        self,
+        pay_from_balance_request: PayFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Pay for a plan from deposited balance
+
+        Starts a plan, or upgrades to a bigger one, paid in full from the organization's deposited balance instead of a card. Requires the `billing:write` scope AND organization-admin privileges.  Only deposited cash can pay: card and UPI deposits once they are 24 hours old, auto-pay top-ups, and settled crypto deposits. Free credit never can — referral bonuses and commissions, promo deposit matches, credit codes, post rewards and other staff grants, downtime credits and manual adjustments. Inference spends free credit first, so cash is what remains after usage has used up free credit. Payment is all-or-nothing at the plan's US-dollar price: there is no balance-plus-card split.  With no active subscription the call starts `plan_key` and the new plan renews from balance by default (see `renew-from-balance`). With one, `plan_key` must be a bigger plan and the call is an upgrade on the same terms as `/billing/subscription/upgrade`: the full new price now and a new billing period from now. 
+
+        :param pay_from_balance_request: (required)
+        :type pay_from_balance_request: PayFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._pay_plan_from_balance_serialize(
+            pay_from_balance_request=pay_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '400': "Problem",
+            '402': "Problem",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '502': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _pay_plan_from_balance_serialize(
+        self,
+        pay_from_balance_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if pay_from_balance_request is not None:
+            _body_params = pay_from_balance_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json', 
+                    'application/problem+json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/billing/subscription/pay-from-balance',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def set_renew_from_balance(
+        self,
+        renew_from_balance_request: RenewFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Subscription:
+        """Choose whether the plan renews from balance
+
+        When on, each renewal is paid from deposited cash (see `pay-from-balance` for what counts) if it covers the full price; otherwise the card on file is charged and the organization's admins are emailed, or, with no card, the renewal fails and the email asks them to add funds. On by default for a plan started from balance, off for a plan started by card or UPI. US-dollar plans only. Requires the `billing:write` scope AND organization-admin privileges. 
+
+        :param renew_from_balance_request: (required)
+        :type renew_from_balance_request: RenewFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_renew_from_balance_serialize(
+            renew_from_balance_request=renew_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def set_renew_from_balance_with_http_info(
+        self,
+        renew_from_balance_request: RenewFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Subscription]:
+        """Choose whether the plan renews from balance
+
+        When on, each renewal is paid from deposited cash (see `pay-from-balance` for what counts) if it covers the full price; otherwise the card on file is charged and the organization's admins are emailed, or, with no card, the renewal fails and the email asks them to add funds. On by default for a plan started from balance, off for a plan started by card or UPI. US-dollar plans only. Requires the `billing:write` scope AND organization-admin privileges. 
+
+        :param renew_from_balance_request: (required)
+        :type renew_from_balance_request: RenewFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_renew_from_balance_serialize(
+            renew_from_balance_request=renew_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def set_renew_from_balance_without_preload_content(
+        self,
+        renew_from_balance_request: RenewFromBalanceRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Choose whether the plan renews from balance
+
+        When on, each renewal is paid from deposited cash (see `pay-from-balance` for what counts) if it covers the full price; otherwise the card on file is charged and the organization's admins are emailed, or, with no card, the renewal fails and the email asks them to add funds. On by default for a plan started from balance, off for a plan started by card or UPI. US-dollar plans only. Requires the `billing:write` scope AND organization-admin privileges. 
+
+        :param renew_from_balance_request: (required)
+        :type renew_from_balance_request: RenewFromBalanceRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_renew_from_balance_serialize(
+            renew_from_balance_request=renew_from_balance_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Subscription",
+            '403': "Problem",
+            '409': "Problem",
+            '422': "Problem",
+            '503': "Problem",
+            '429': "Problem",
+            'default': "Problem",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _set_renew_from_balance_serialize(
+        self,
+        renew_from_balance_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if renew_from_balance_request is not None:
+            _body_params = renew_from_balance_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json', 
+                    'application/problem+json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerAuth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='PUT',
+            resource_path='/billing/subscription/renew-from-balance',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

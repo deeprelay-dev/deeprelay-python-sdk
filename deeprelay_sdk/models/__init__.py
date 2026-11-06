@@ -56,10 +56,12 @@ from deeprelay_sdk.models.model_pricing import ModelPricing
 from deeprelay_sdk.models.model_rate import ModelRate
 from deeprelay_sdk.models.open_ai_error_envelope import OpenAIErrorEnvelope
 from deeprelay_sdk.models.open_ai_error_envelope_error import OpenAIErrorEnvelopeError
+from deeprelay_sdk.models.pay_from_balance_request import PayFromBalanceRequest
 from deeprelay_sdk.models.peak_window import PeakWindow
 from deeprelay_sdk.models.problem import Problem
 from deeprelay_sdk.models.referee_status import RefereeStatus
 from deeprelay_sdk.models.referral import Referral
+from deeprelay_sdk.models.renew_from_balance_request import RenewFromBalanceRequest
 from deeprelay_sdk.models.request_attempt import RequestAttempt
 from deeprelay_sdk.models.request_log_entry import RequestLogEntry
 from deeprelay_sdk.models.request_log_page import RequestLogPage
@@ -69,6 +71,7 @@ from deeprelay_sdk.models.response_format_text import ResponseFormatText
 from deeprelay_sdk.models.spending_limit import SpendingLimit
 from deeprelay_sdk.models.stream_options import StreamOptions
 from deeprelay_sdk.models.subscription import Subscription
+from deeprelay_sdk.models.subscription_balance_payment import SubscriptionBalancePayment
 from deeprelay_sdk.models.subscription_checkout_request import SubscriptionCheckoutRequest
 from deeprelay_sdk.models.subscription_checkout_session import SubscriptionCheckoutSession
 from deeprelay_sdk.models.subscription_model_usage import SubscriptionModelUsage

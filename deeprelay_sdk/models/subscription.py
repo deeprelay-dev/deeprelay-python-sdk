@@ -21,6 +21,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from deeprelay_sdk.models.subscription_balance_payment import SubscriptionBalancePayment
 from deeprelay_sdk.models.subscription_plan import SubscriptionPlan
 from deeprelay_sdk.models.subscription_quota import SubscriptionQuota
 from deeprelay_sdk.models.subscription_tier import SubscriptionTier
@@ -42,7 +43,9 @@ class Subscription(BaseModel):
     quota: SubscriptionQuota
     usage: Optional[SubscriptionUsage] = None
     plans: List[SubscriptionTier] = Field(description="Every plan this deployment offers, smallest first (Base, then Plus when it is configured), each with its price and quota. The keys are the accepted `plan_key` values for checkout and upgrade. Empty when nothing can be bought here.")
-    __properties: ClassVar[List[str]] = ["subscribed", "status", "cancel_at_period_end", "current_period_start", "current_period_end", "plan", "quota", "usage", "plans"]
+    renew_from_balance: StrictBool = Field(description="Whether each renewal is paid from deposited balance when it covers the full price (see `/billing/subscription/renew-from-balance`).")
+    balance_payment: Optional[SubscriptionBalancePayment] = None
+    __properties: ClassVar[List[str]] = ["subscribed", "status", "cancel_at_period_end", "current_period_start", "current_period_end", "plan", "quota", "usage", "plans", "renew_from_balance", "balance_payment"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -99,6 +102,9 @@ class Subscription(BaseModel):
                 if _item_plans:
                     _items.append(_item_plans.to_dict())
             _dict['plans'] = _items
+        # override the default output from pydantic by calling `to_dict()` of balance_payment
+        if self.balance_payment:
+            _dict['balance_payment'] = self.balance_payment.to_dict()
         return _dict
 
     @classmethod
@@ -119,7 +125,9 @@ class Subscription(BaseModel):
             "plan": SubscriptionPlan.from_dict(obj["plan"]) if obj.get("plan") is not None else None,
             "quota": SubscriptionQuota.from_dict(obj["quota"]) if obj.get("quota") is not None else None,
             "usage": SubscriptionUsage.from_dict(obj["usage"]) if obj.get("usage") is not None else None,
-            "plans": [SubscriptionTier.from_dict(_item) for _item in obj["plans"]] if obj.get("plans") is not None else None
+            "plans": [SubscriptionTier.from_dict(_item) for _item in obj["plans"]] if obj.get("plans") is not None else None,
+            "renew_from_balance": obj.get("renew_from_balance"),
+            "balance_payment": SubscriptionBalancePayment.from_dict(obj["balance_payment"]) if obj.get("balance_payment") is not None else None
         })
         return _obj
 
