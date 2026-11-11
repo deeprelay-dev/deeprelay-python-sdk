@@ -123,6 +123,17 @@ OpenAI-compatible chat completion. Parameters fall into three groups:
   400 `unsupported_parameter`; `input_audio` and `file` content parts
   return 400 `unsupported_content_part`.
 
+**Reasoning is on unless you set it.** deeprelay never picks a
+`reasoning_effort` for you. A request without one reaches the model
+without one, and the model reasons at its vendor default, which on
+most reasoning models means it thinks before answering. Those tokens
+are billed as output and counted in
+`usage.completion_tokens_details.reasoning_tokens`. On a model that
+takes a reasoning effort, the `x-deeprelay-reasoning-effort` response
+header reads `model-default` when no effort reached it. Send
+`reasoning_effort: "none"` or `"low"` to turn reasoning off or down
+where the model allows it.
+
 A non-strict `json_schema` sent to a model that can only guarantee
 JSON is served as `json_object` and reported as
 `response_format:downgraded`; a strict one is rejected. A
@@ -224,7 +235,7 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Successful response. application/json for non-streaming requests; text/event-stream for streaming requests (stream&#x3D;true).  |  * X-Deeprelay-Served-Model -  <br>  * X-Deeprelay-Requested-Model -  <br>  * X-Deeprelay-Fallback-Reason -  <br>  * x-deeprelay-ignored-params -  <br>  * x-deeprelay-cost -  <br>  * x-deeprelay-quota-input-remaining -  <br>  * x-deeprelay-quota-output-remaining -  <br>  * x-deeprelay-quota-reset -  <br>  * x-deeprelay-quota-weekly-input-remaining -  <br>  * x-deeprelay-quota-weekly-input-limit -  <br>  * x-deeprelay-quota-weekly-output-remaining -  <br>  * x-deeprelay-quota-weekly-output-limit -  <br>  * x-deeprelay-quota-search-remaining -  <br>  * x-deeprelay-quota-search-limit -  <br>  * x-ratelimit-limit-requests -  <br>  * x-ratelimit-remaining-requests -  <br>  * x-ratelimit-reset-requests -  <br>  |
+**200** | Successful response. application/json for non-streaming requests; text/event-stream for streaming requests (stream&#x3D;true).  |  * X-Deeprelay-Served-Model -  <br>  * X-Deeprelay-Requested-Model -  <br>  * X-Deeprelay-Fallback-Reason -  <br>  * x-deeprelay-ignored-params -  <br>  * x-deeprelay-reasoning-effort -  <br>  * x-deeprelay-cost -  <br>  * x-deeprelay-quota-input-remaining -  <br>  * x-deeprelay-quota-output-remaining -  <br>  * x-deeprelay-quota-reset -  <br>  * x-deeprelay-quota-weekly-input-remaining -  <br>  * x-deeprelay-quota-weekly-input-limit -  <br>  * x-deeprelay-quota-weekly-output-remaining -  <br>  * x-deeprelay-quota-weekly-output-limit -  <br>  * x-deeprelay-quota-search-remaining -  <br>  * x-deeprelay-quota-search-limit -  <br>  * x-ratelimit-limit-requests -  <br>  * x-ratelimit-remaining-requests -  <br>  * x-ratelimit-reset-requests -  <br>  |
 **400** | Invalid request (OpenAI error envelope). |  * X-Deeprelay-Requested-Model -  <br>  * X-Deeprelay-Fallback-Attempted -  <br>  * X-Deeprelay-Error-Code -  <br>  |
 **401** | Missing or invalid API key (OpenAI error envelope). |  * X-Deeprelay-Error-Code -  <br>  |
 **402** | Insufficient balance or a spend limit reached (OpenAI error envelope, SERV-06): &#x60;insufficient_balance&#x60;, &#x60;daily_limit_reached&#x60;, &#x60;spending_limit_reached&#x60;, &#x60;api_key_budget_exceeded&#x60; (this API key&#39;s monthly budget) or &#x60;member_spend_limit_reached&#x60; (the member&#39;s monthly spend limit). Carries &#x60;x-should-retry: false&#x60;: the same request will not succeed until the wallet or the limit changes. |  * x-should-retry -  <br>  * X-Deeprelay-Error-Code -  <br>  |
