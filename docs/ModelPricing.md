@@ -18,9 +18,10 @@ Name | Type | Description | Notes
 **per_video_second_microcents** | **int** | Exact per-second-of-output-video rate in micro-cents (1e-6 cent). Prefer this for video models. | [optional] 
 **per_search_microcents** | **int** | Pay-as-you-go price of one server-side web search, in micro-cents (1e-6 cent); 200000 is $2.00 per 1,000 searches. Present only on models with &#x60;web_search: true&#x60;. Charged once per search that returns results, on top of the token cost; a failed search is free. The search results the model reads are ordinary prompt tokens at the input rate. Searches inside a subscriber&#39;s monthly allowance are covered by the plan, and searches past it (when the organization opted in on &#x60;/search/settings&#x60;) bill at the separate overflow price shown there, not at this rate. | [optional] 
 **period** | **str** | Present only on a model priced by time of day. Which side of the peak schedule the instant this response was rendered falls on; the flat rate fields above are the rates in effect at that instant. A request is billed at the rate in effect when it ARRIVES (UTC), so a caller planning a call for later should price it from &#x60;peak&#x60; / &#x60;off_peak&#x60; and &#x60;peak_windows_utc&#x60;. | [optional] 
-**peak_windows_utc** | [**List[PeakWindow]**](PeakWindow.md) | The daily UTC ranges during which the &#x60;peak&#x60; rates apply, start inclusive and end exclusive (\&quot;24:00\&quot; is a valid end; a range whose end sorts before its start wraps midnight). Present only on a model priced by time of day. | [optional] 
+**peak_windows_utc** | [**List[PeakWindow]**](PeakWindow.md) | The UTC ranges during which the &#x60;peak&#x60; rates apply, start inclusive and end exclusive (\&quot;24:00\&quot; is a valid end; a range whose end sorts before its start wraps midnight). A range with &#x60;days&#x60; applies only on those ISO weekdays; without &#x60;days&#x60; it applies every day. Present only on a model priced by time of day. | [optional] 
 **peak** | [**ModelRate**](ModelRate.md) |  | [optional] 
 **off_peak** | [**ModelRate**](ModelRate.md) |  | [optional] 
+**batch** | [**ModelBatchPricing**](ModelBatchPricing.md) |  | [optional] 
 
 ## Example
 

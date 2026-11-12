@@ -41,6 +41,11 @@ Name | Type | Description | Notes
 **served_model** | **str** | The model that produced the response. Omitted when no model served (a failed or rejected call). When a backup served, &#x60;model&#x60; is this model and the row is billed at its price. | [optional] 
 **fallback_reason** | **str** | Set when backup models were tried: the requested model&#39;s public error code (for example &#x60;upstream_timeout&#x60;). Rows with it set are the ones &#x60;fallback&#x3D;true&#x60; returns. | [optional] 
 **attempts** | [**List[RequestAttempt]**](RequestAttempt.md) | Present when backup models were tried: every model the request went through, in order, including skipped backups. Upstream providers are never named. | [optional] 
+**source** | **str** | &#x60;api&#x60; for a synchronous call, &#x60;batch&#x60; for a line run by the Batch API. Present on every row. | [optional] 
+**batch_id** | **str** | The batch this line belongs to. Batch rows only. | [optional] 
+**custom_id** | **str** | The line&#39;s &#x60;custom_id&#x60; from your input file. Batch rows only. | [optional] 
+**rate_tier** | **str** | The rate the line was billed at: &#x60;off_peak&#x60; (the model&#39;s off-peak rate), &#x60;batch&#x60; (the model&#39;s batch price) or &#x60;normal&#x60; (the model&#39;s standard rate; a model with no peak schedule). Batch rows only. | [optional] 
+**final** | **bool** | Batch rows only. &#x60;false&#x60; on an attempt that was retried; the line&#39;s outcome is the row with &#x60;final: true&#x60;. | [optional] 
 
 ## Example
 

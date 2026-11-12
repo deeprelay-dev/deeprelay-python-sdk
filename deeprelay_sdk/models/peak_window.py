@@ -19,7 +19,8 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
@@ -30,7 +31,8 @@ class PeakWindow(BaseModel):
     """ # noqa: E501
     start: StrictStr = Field(description="\"HH:MM\" UTC, inclusive.")
     end: StrictStr = Field(description="\"HH:MM\" UTC, exclusive (\"24:00\" means until midnight).")
-    __properties: ClassVar[List[str]] = ["start", "end"]
+    days: Optional[List[Annotated[int, Field(le=7, strict=True, ge=1)]]] = Field(default=None, description="ISO weekdays (1 = Monday ... 7 = Sunday) of the UTC date on which the window starts. Absent means every day. A window that wraps past midnight belongs to the day it started on.")
+    __properties: ClassVar[List[str]] = ["start", "end", "days"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -84,7 +86,8 @@ class PeakWindow(BaseModel):
 
         _obj = cls.model_validate({
             "start": obj.get("start"),
-            "end": obj.get("end")
+            "end": obj.get("end"),
+            "days": obj.get("days")
         })
         return _obj
 

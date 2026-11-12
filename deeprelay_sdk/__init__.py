@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.11"
+__version__ = "0.4.12"
 
 # Define package exports
 __all__ = [
@@ -71,6 +71,7 @@ __all__ = [
     "JSONSchemaFormat",
     "ListDeposits200Response",
     "Model",
+    "ModelBatchPricing",
     "ModelList",
     "ModelMetrics",
     "ModelParametersInner",
@@ -183,6 +184,7 @@ from deeprelay_sdk.models.inference_preflight import InferencePreflight as Infer
 from deeprelay_sdk.models.json_schema_format import JSONSchemaFormat as JSONSchemaFormat
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response as ListDeposits200Response
 from deeprelay_sdk.models.model import Model as Model
+from deeprelay_sdk.models.model_batch_pricing import ModelBatchPricing as ModelBatchPricing
 from deeprelay_sdk.models.model_list import ModelList as ModelList
 from deeprelay_sdk.models.model_metrics import ModelMetrics as ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner as ModelParametersInner

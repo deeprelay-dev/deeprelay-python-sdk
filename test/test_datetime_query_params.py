@@ -69,6 +69,8 @@ class TestDatetimeQueryParams(unittest.TestCase):
             limit=None,
             modality=None,
             model=None,
+            source=None,
+            batch_id=None,
             _request_auth=None,
             _content_type=None,
             _headers=None,

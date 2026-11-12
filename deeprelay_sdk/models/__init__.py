@@ -49,6 +49,7 @@ from deeprelay_sdk.models.inference_preflight import InferencePreflight
 from deeprelay_sdk.models.json_schema_format import JSONSchemaFormat
 from deeprelay_sdk.models.list_deposits200_response import ListDeposits200Response
 from deeprelay_sdk.models.model import Model
+from deeprelay_sdk.models.model_batch_pricing import ModelBatchPricing
 from deeprelay_sdk.models.model_list import ModelList
 from deeprelay_sdk.models.model_metrics import ModelMetrics
 from deeprelay_sdk.models.model_parameters_inner import ModelParametersInner

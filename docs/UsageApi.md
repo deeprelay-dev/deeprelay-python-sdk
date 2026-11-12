@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **list_usage**
-> UsagePage list_usage(bucket=bucket, group_by=group_by, start=start, end=end, cursor=cursor, limit=limit, modality=modality, model=model)
+> UsagePage list_usage(bucket=bucket, group_by=group_by, start=start, end=end, cursor=cursor, limit=limit, modality=modality, model=model, source=source, batch_id=batch_id)
 
 Time-bucketed usage
 
@@ -60,10 +60,12 @@ with deeprelay_sdk.ApiClient(configuration) as api_client:
     limit = 50 # int |  (optional) (default to 50)
     modality = 'modality_example' # str | Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape.  (optional)
     model = 'model_example' # str | Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape.  (optional)
+    source = 'source_example' # str | Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400).  (optional)
+    batch_id = 'batch_id_example' # str | Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log).  (optional)
 
     try:
         # Time-bucketed usage
-        api_response = api_instance.list_usage(bucket=bucket, group_by=group_by, start=start, end=end, cursor=cursor, limit=limit, modality=modality, model=model)
+        api_response = api_instance.list_usage(bucket=bucket, group_by=group_by, start=start, end=end, cursor=cursor, limit=limit, modality=modality, model=model, source=source, batch_id=batch_id)
         print("The response of UsageApi->list_usage:\n")
         pprint(api_response)
     except Exception as e:
@@ -85,6 +87,8 @@ Name | Type | Description  | Notes
  **limit** | **int**|  | [optional] [default to 50]
  **modality** | **str**| Return inference-usage rows for this modality only. Setting &#x60;modality&#x60; or &#x60;model&#x60; selects the inference-usage shape; omit both for the instance-usage shape.  | [optional] 
  **model** | **str**| Return inference-usage rows for this model only: an exact match on the model &#x60;id&#x60; as listed by &#x60;GET /models&#x60;. May be combined with &#x60;modality&#x60;. Setting &#x60;modality&#x60; or &#x60;model&#x60; selects the inference-usage shape.  | [optional] 
+ **source** | **str**| Return inference-usage rows from this source only: &#x60;api&#x60; (synchronous calls) or &#x60;batch&#x60; (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 &#x60;validation_failed&#x60; (the request log answers the same mistake with a 400).  | [optional] 
+ **batch_id** | **str**| Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 &#x60;validation_failed&#x60; (a 400 on the request log).  | [optional] 
 
 ### Return type
 

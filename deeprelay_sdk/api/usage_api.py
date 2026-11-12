@@ -51,6 +51,8 @@ class UsageApi:
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
         modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
         model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
+        source: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). ")] = None,
+        batch_id: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -84,6 +86,10 @@ class UsageApi:
         :type modality: str
         :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
         :type model: str
+        :param source: Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). 
+        :type source: str
+        :param batch_id: Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). 
+        :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -115,6 +121,8 @@ class UsageApi:
             limit=limit,
             modality=modality,
             model=model,
+            source=source,
+            batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -148,6 +156,8 @@ class UsageApi:
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
         modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
         model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
+        source: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). ")] = None,
+        batch_id: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -181,6 +191,10 @@ class UsageApi:
         :type modality: str
         :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
         :type model: str
+        :param source: Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). 
+        :type source: str
+        :param batch_id: Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). 
+        :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -212,6 +226,8 @@ class UsageApi:
             limit=limit,
             modality=modality,
             model=model,
+            source=source,
+            batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -245,6 +261,8 @@ class UsageApi:
         limit: Optional[Annotated[int, Field(le=200, strict=True, ge=1)]] = None,
         modality: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this modality only. Setting `modality` or `model` selects the inference-usage shape; omit both for the instance-usage shape. ")] = None,
         model: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. ")] = None,
+        source: Annotated[Optional[StrictStr], Field(description="Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). ")] = None,
+        batch_id: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). ")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -278,6 +296,10 @@ class UsageApi:
         :type modality: str
         :param model: Return inference-usage rows for this model only: an exact match on the model `id` as listed by `GET /models`. May be combined with `modality`. Setting `modality` or `model` selects the inference-usage shape. 
         :type model: str
+        :param source: Return inference-usage rows from this source only: `api` (synchronous calls) or `batch` (Batch API lines). Setting it selects the inference-usage shape. Any other value is a 422 `validation_failed` (the request log answers the same mistake with a 400). 
+        :type source: str
+        :param batch_id: Return inference-usage rows for the lines of this batch only. Setting it selects the inference-usage shape. A value that is not a batch id is a 422 `validation_failed` (a 400 on the request log). 
+        :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -309,6 +331,8 @@ class UsageApi:
             limit=limit,
             modality=modality,
             model=model,
+            source=source,
+            batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -337,6 +361,8 @@ class UsageApi:
         limit,
         modality,
         model,
+        source,
+        batch_id,
         _request_auth,
         _content_type,
         _headers,
@@ -404,6 +430,14 @@ class UsageApi:
         if model is not None:
             
             _query_params.append(('model', model))
+            
+        if source is not None:
+            
+            _query_params.append(('source', source))
+            
+        if batch_id is not None:
+            
+            _query_params.append(('batch_id', batch_id))
             
         # process the header parameters
         # process the form parameters

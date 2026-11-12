@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **start** | **str** | \&quot;HH:MM\&quot; UTC, inclusive. | 
 **end** | **str** | \&quot;HH:MM\&quot; UTC, exclusive (\&quot;24:00\&quot; means until midnight). | 
+**days** | **List[int]** | ISO weekdays (1 &#x3D; Monday ... 7 &#x3D; Sunday) of the UTC date on which the window starts. Absent means every day. A window that wraps past midnight belongs to the day it started on. | [optional] 
 
 ## Example
 
