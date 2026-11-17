@@ -15,12 +15,13 @@
 """  # noqa: E501
 
 
-__version__ = "0.4.12"
+__version__ = "0.4.13"
 
 # Define package exports
 __all__ = [
     "AlertsApi",
     "ApiKeysApi",
+    "BatchApi",
     "BillingApi",
     "InferenceApi",
     "MetaApi",
@@ -47,6 +48,22 @@ __all__ = [
     "ApiKeyScopes",
     "ApiKeyUpdate",
     "Balance",
+    "Batch",
+    "BatchDeeprelay",
+    "BatchDeeprelayBatchPrice",
+    "BatchDeeprelayCurrentWindow",
+    "BatchDeeprelayEstimatedTokens",
+    "BatchDeeprelayRequestCounts",
+    "BatchFile",
+    "BatchFileDeleted",
+    "BatchFileList",
+    "BatchLimits",
+    "BatchList",
+    "BatchMoney",
+    "BatchRequestCounts",
+    "BatchUsage",
+    "BatchUsageInputTokensDetails",
+    "BatchUsageOutputTokensDetails",
     "ChatChoice",
     "ChatCompletionRequest",
     "ChatCompletionRequestResponseFormat",
@@ -54,7 +71,10 @@ __all__ = [
     "ChatCompletionResponse",
     "ChatMessage",
     "CostDetails",
+    "CreateBatchRequest",
+    "CreateBatchRequestOutputExpiresAfter",
     "CreateCryptoDepositRequest",
+    "CreateFileRequestExpiresAfter",
     "CreateWebhookEndpointRequest",
     "CryptoDeposit",
     "Embedding",
@@ -130,6 +150,7 @@ __all__ = [
 # import apis into sdk package
 from deeprelay_sdk.api.alerts_api import AlertsApi as AlertsApi
 from deeprelay_sdk.api.api_keys_api import ApiKeysApi as ApiKeysApi
+from deeprelay_sdk.api.batch_api import BatchApi as BatchApi
 from deeprelay_sdk.api.billing_api import BillingApi as BillingApi
 from deeprelay_sdk.api.inference_api import InferenceApi as InferenceApi
 from deeprelay_sdk.api.meta_api import MetaApi as MetaApi
@@ -160,6 +181,22 @@ from deeprelay_sdk.models.api_key_list import ApiKeyList as ApiKeyList
 from deeprelay_sdk.models.api_key_scopes import ApiKeyScopes as ApiKeyScopes
 from deeprelay_sdk.models.api_key_update import ApiKeyUpdate as ApiKeyUpdate
 from deeprelay_sdk.models.balance import Balance as Balance
+from deeprelay_sdk.models.batch import Batch as Batch
+from deeprelay_sdk.models.batch_deeprelay import BatchDeeprelay as BatchDeeprelay
+from deeprelay_sdk.models.batch_deeprelay_batch_price import BatchDeeprelayBatchPrice as BatchDeeprelayBatchPrice
+from deeprelay_sdk.models.batch_deeprelay_current_window import BatchDeeprelayCurrentWindow as BatchDeeprelayCurrentWindow
+from deeprelay_sdk.models.batch_deeprelay_estimated_tokens import BatchDeeprelayEstimatedTokens as BatchDeeprelayEstimatedTokens
+from deeprelay_sdk.models.batch_deeprelay_request_counts import BatchDeeprelayRequestCounts as BatchDeeprelayRequestCounts
+from deeprelay_sdk.models.batch_file import BatchFile as BatchFile
+from deeprelay_sdk.models.batch_file_deleted import BatchFileDeleted as BatchFileDeleted
+from deeprelay_sdk.models.batch_file_list import BatchFileList as BatchFileList
+from deeprelay_sdk.models.batch_limits import BatchLimits as BatchLimits
+from deeprelay_sdk.models.batch_list import BatchList as BatchList
+from deeprelay_sdk.models.batch_money import BatchMoney as BatchMoney
+from deeprelay_sdk.models.batch_request_counts import BatchRequestCounts as BatchRequestCounts
+from deeprelay_sdk.models.batch_usage import BatchUsage as BatchUsage
+from deeprelay_sdk.models.batch_usage_input_tokens_details import BatchUsageInputTokensDetails as BatchUsageInputTokensDetails
+from deeprelay_sdk.models.batch_usage_output_tokens_details import BatchUsageOutputTokensDetails as BatchUsageOutputTokensDetails
 from deeprelay_sdk.models.chat_choice import ChatChoice as ChatChoice
 from deeprelay_sdk.models.chat_completion_request import ChatCompletionRequest as ChatCompletionRequest
 from deeprelay_sdk.models.chat_completion_request_response_format import ChatCompletionRequestResponseFormat as ChatCompletionRequestResponseFormat
@@ -167,7 +204,10 @@ from deeprelay_sdk.models.chat_completion_request_tool_choice import ChatComplet
 from deeprelay_sdk.models.chat_completion_response import ChatCompletionResponse as ChatCompletionResponse
 from deeprelay_sdk.models.chat_message import ChatMessage as ChatMessage
 from deeprelay_sdk.models.cost_details import CostDetails as CostDetails
+from deeprelay_sdk.models.create_batch_request import CreateBatchRequest as CreateBatchRequest
+from deeprelay_sdk.models.create_batch_request_output_expires_after import CreateBatchRequestOutputExpiresAfter as CreateBatchRequestOutputExpiresAfter
 from deeprelay_sdk.models.create_crypto_deposit_request import CreateCryptoDepositRequest as CreateCryptoDepositRequest
+from deeprelay_sdk.models.create_file_request_expires_after import CreateFileRequestExpiresAfter as CreateFileRequestExpiresAfter
 from deeprelay_sdk.models.create_webhook_endpoint_request import CreateWebhookEndpointRequest as CreateWebhookEndpointRequest
 from deeprelay_sdk.models.crypto_deposit import CryptoDeposit as CryptoDeposit
 from deeprelay_sdk.models.embedding import Embedding as Embedding
