@@ -31,7 +31,7 @@ class SubscriptionCheckoutRequest(BaseModel):
     success_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns after a completed payment. Defaults to the deployment's configured URL. Must be on the deployment's dashboard origin, else 422 `validation_failed`.")
     cancel_url: Optional[StrictStr] = Field(default=None, description="Where the provider returns if checkout is abandoned. Defaults to the deployment's configured URL. Must be on the deployment's dashboard origin, else 422 `validation_failed`.")
     plan_key: Optional[StrictStr] = Field(default=None, description="The plan to buy — `flat` (Base, the default) or `plus`. Pins the plan the client displayed: an unknown or un-offered key is a 400 rather than a silent purchase of a different tier.")
-    method: Optional[StrictStr] = Field(default=None, description="`card` (dollars, card or Link; the default) or `upi` (rupees, UPI AutoPay). On a subscribed organization, the other currency's method switches the existing plan's billing.")
+    method: Optional[StrictStr] = Field(default=None, description="`card` (dollars, card or Link; the default), `upi` (rupees, UPI AutoPay) or `deposit` (a deposit for exactly the plan's price, paid with a method that cannot be disputed: Alipay, WeChat Pay, stablecoins, Bancontact, EPS or Pay by Bank. When it lands, the plan is paid from deposited balance and renews from balance). On a subscribed organization, the other currency's method switches the existing plan's billing; `deposit` is for starting a plan.")
     __properties: ClassVar[List[str]] = ["success_url", "cancel_url", "plan_key", "method"]
 
     @field_validator('method')
@@ -40,8 +40,8 @@ class SubscriptionCheckoutRequest(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['card', 'upi']):
-            raise ValueError("must be one of enum values ('card', 'upi')")
+        if value not in set(['card', 'upi', 'deposit']):
+            raise ValueError("must be one of enum values ('card', 'upi', 'deposit')")
         return value
 
     model_config = ConfigDict(
