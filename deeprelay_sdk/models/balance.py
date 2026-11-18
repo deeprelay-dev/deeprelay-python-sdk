@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -34,7 +34,19 @@ class Balance(BaseModel):
     auto_pay_threshold_cents: StrictInt = Field(description="Auto-pay triggers when the balance falls below this. Meaningful only when auto_pay_enabled.")
     auto_pay_amount_cents: StrictInt = Field(description="Amount auto-pay charges when it triggers. Meaningful only when auto_pay_enabled.")
     burn_cents_per_hour: Optional[StrictInt] = Field(description="Live burn rate in USD cents per hour: the committed hourly price of every instance that is live, counted from launch — so instances still creating, provisioning or booting are included, not only those that have reached running. 0 when nothing is live.  `null` means the burn rate could not be determined. Treat that as unknown, never as 0: reading an unavailable burn rate as \"nothing running\" reports unbounded runway to an organization that may be minutes from empty.")
-    __properties: ClassVar[List[str]] = ["balance_cents", "balance_dollars", "auto_pay_enabled", "auto_pay_threshold_cents", "auto_pay_amount_cents", "burn_cents_per_hour"]
+    billing_mode: Optional[StrictStr] = Field(default=None, description="How the organization is billed. `prepaid` is the ordinary account: usage draws on prepaid credit. `invoice` is an account billed monthly in arrears: `balance_cents` is then minus the usage not yet invoiced, and may run below zero down to `credit_limit_cents`. The server always returns this field. It is not listed as required so that a client generated from this document still reads a response from a server that predates it.")
+    credit_limit_cents: Optional[StrictInt] = Field(default=None, description="How far below zero the balance of an account billed by invoice may run, in USD cents. Present only when `billing_mode` is `invoice`.")
+    __properties: ClassVar[List[str]] = ["balance_cents", "balance_dollars", "auto_pay_enabled", "auto_pay_threshold_cents", "auto_pay_amount_cents", "burn_cents_per_hour", "billing_mode", "credit_limit_cents"]
+
+    @field_validator('billing_mode')
+    def billing_mode_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['prepaid', 'invoice']):
+            raise ValueError("must be one of enum values ('prepaid', 'invoice')")
+        return value
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -97,7 +109,9 @@ class Balance(BaseModel):
             "auto_pay_enabled": obj.get("auto_pay_enabled"),
             "auto_pay_threshold_cents": obj.get("auto_pay_threshold_cents"),
             "auto_pay_amount_cents": obj.get("auto_pay_amount_cents"),
-            "burn_cents_per_hour": obj.get("burn_cents_per_hour")
+            "burn_cents_per_hour": obj.get("burn_cents_per_hour"),
+            "billing_mode": obj.get("billing_mode"),
+            "credit_limit_cents": obj.get("credit_limit_cents")
         })
         return _obj
 

@@ -12,6 +12,8 @@ Name | Type | Description | Notes
 **auto_pay_threshold_cents** | **int** | Auto-pay triggers when the balance falls below this. Meaningful only when auto_pay_enabled. | 
 **auto_pay_amount_cents** | **int** | Amount auto-pay charges when it triggers. Meaningful only when auto_pay_enabled. | 
 **burn_cents_per_hour** | **int** | Live burn rate in USD cents per hour: the committed hourly price of every instance that is live, counted from launch — so instances still creating, provisioning or booting are included, not only those that have reached running. 0 when nothing is live.  &#x60;null&#x60; means the burn rate could not be determined. Treat that as unknown, never as 0: reading an unavailable burn rate as \&quot;nothing running\&quot; reports unbounded runway to an organization that may be minutes from empty. | 
+**billing_mode** | **str** | How the organization is billed. &#x60;prepaid&#x60; is the ordinary account: usage draws on prepaid credit. &#x60;invoice&#x60; is an account billed monthly in arrears: &#x60;balance_cents&#x60; is then minus the usage not yet invoiced, and may run below zero down to &#x60;credit_limit_cents&#x60;. The server always returns this field. It is not listed as required so that a client generated from this document still reads a response from a server that predates it. | [optional] 
+**credit_limit_cents** | **int** | How far below zero the balance of an account billed by invoice may run, in USD cents. Present only when &#x60;billing_mode&#x60; is &#x60;invoice&#x60;. | [optional] 
 
 ## Example
 
