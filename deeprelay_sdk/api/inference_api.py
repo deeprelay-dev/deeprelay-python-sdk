@@ -395,6 +395,7 @@ class InferenceApi:
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
+            '502': "OpenAIErrorEnvelope",
             '503': "OpenAIErrorEnvelope",
         }
         response_data = self.api_client.call_api(
@@ -480,6 +481,7 @@ class InferenceApi:
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
+            '502': "OpenAIErrorEnvelope",
             '503': "OpenAIErrorEnvelope",
         }
         response_data = self.api_client.call_api(
@@ -565,6 +567,7 @@ class InferenceApi:
             '422': "OpenAIErrorEnvelope",
             '429': "OpenAIErrorEnvelope",
             '500': "OpenAIErrorEnvelope",
+            '502': "OpenAIErrorEnvelope",
             '503': "OpenAIErrorEnvelope",
         }
         response_data = self.api_client.call_api(
